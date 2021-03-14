@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 @RestController
 public class SendEmailController {
+
     @PostMapping("/mailclient")
     public ResponseEntity<Void> sendEmail(@Valid @RequestBody NewEmailRequest newEmailRequest) {
 
