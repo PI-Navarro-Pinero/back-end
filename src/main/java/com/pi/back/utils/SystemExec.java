@@ -17,14 +17,9 @@ public class SystemExec {
             while(line!=null) {
                 line=reader.readLine();
             }
-
         }
-        catch(IOException e1) {
+        catch(IOException | InterruptedException e1) {
             e1.printStackTrace();
         }
-        catch(InterruptedException e2) {
-            e2.printStackTrace();
-        }
-
     }
 }
