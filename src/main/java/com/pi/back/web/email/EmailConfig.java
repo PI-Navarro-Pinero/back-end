@@ -29,7 +29,9 @@ public class EmailConfig {
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
-        properties.forEach((key, value) -> props.setProperty(key.toString(), value.toString()));
+
+        if(properties != null)
+            properties.forEach((key, value) -> props.setProperty(key.toString(), value.toString()));
 
         return mailSender;
     }

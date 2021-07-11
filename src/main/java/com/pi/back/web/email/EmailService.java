@@ -33,13 +33,15 @@ public class EmailService {
             mimeMessage.setFrom(new InternetAddress(email.getFrom()));
             mimeMessage.setSubject(email.getSubject());
             mimeMessage.setText(email.getBody());
-            headers.forEach((key, value) -> {
-                try {
-                    mimeMessage.setHeader(key.toString(), value.toString());
-                } catch (MessagingException e) {
-                    e.printStackTrace();
-                }
-            });
+
+            if(headers != null)
+                headers.forEach((key, value) -> {
+                    try {
+                        mimeMessage.setHeader(key.toString(), value.toString());
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
+                });
 
             // TODO implement attachments functionality
             if(fileToAttach != null) {

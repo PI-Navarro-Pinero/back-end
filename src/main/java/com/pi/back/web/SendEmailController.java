@@ -32,6 +32,7 @@ public class SendEmailController {
         }
         catch (MailException mailException) {
             System.err.println(mailException.getMessage());
+            mailException.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok().build();
