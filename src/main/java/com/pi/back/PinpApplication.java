@@ -4,10 +4,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 @SpringBootApplication
-public class LanzamientoaptBackApplication {
+public class PinpApplication {
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder(LanzamientoaptBackApplication.class)
+		new SpringApplicationBuilder(PinpApplication.class)
 				.run(args);
 	}
 }
