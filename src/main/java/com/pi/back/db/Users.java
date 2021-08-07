@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Data
@@ -33,4 +34,8 @@ public class Users {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ROLEID")
     private Roles role;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "PERSONID")
+    private People people;
 }
