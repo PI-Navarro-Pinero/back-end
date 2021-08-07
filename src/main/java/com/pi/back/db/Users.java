@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Data
@@ -27,6 +30,7 @@ public class Users {
     @Column(nullable = false, name = "PASSWORD")
     private String password;
 
-    @Column(nullable = false, name = "ROLEID")
-    private String roleId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ROLEID")
+    private Roles roleId;
 }
