@@ -23,5 +23,5 @@ public class Roles {
     private Integer id;
 
     @Column(nullable = false, name = "ROLE", unique = true)
-    private String role;
+    private String roleName;
 }
