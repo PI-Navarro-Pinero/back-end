@@ -37,5 +37,5 @@ public class Users {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "PERSONID")
-    private People people;
+    private People person;
 }

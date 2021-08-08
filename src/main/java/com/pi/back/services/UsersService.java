@@ -24,4 +24,8 @@ public class UsersService {
         log.info("{} users found", users.size());
         return users;
     }
+
+    public Users findUser(int userId) {
+        return usersRepository.findUser(userId);
+    }
 }
