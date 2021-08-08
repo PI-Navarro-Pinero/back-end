@@ -46,8 +46,8 @@ values (1, 'Tomas Santiago Piñero', '20-39445871-7', 'address1@email.com'),
 
 -- load users table
 insert into users(id, username, password, roleid, personid)
-values (1, 'falcon', 'TomasPinp', 1, 1),
-       (2, 'hawkeye', 'SebastianPinp', 1, 2),
+values (1, 'falcon', 'TomasPinp', 1, 2),
+       (2, 'hawkeye', 'SebastianPinp', 1, 1),
        (3, 'eagle', 'AdminPinp', 2, 3),
        (4, 'crow', 'UserPinp', 3, 4);
 
