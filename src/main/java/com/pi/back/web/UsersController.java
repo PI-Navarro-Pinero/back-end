@@ -1,6 +1,6 @@
 package com.pi.back.web;
 
-import com.pi.back.db.Users;
+import com.pi.back.db.User;
 import com.pi.back.services.UsersService;
 import com.pi.back.web.users.UserResponse;
 import com.pi.back.web.users.UsersResponse;
@@ -25,7 +25,7 @@ public class UsersController {
 
     @GetMapping("/users")
     public ResponseEntity<UsersResponse> fetchUsers() {
-        List<Users> usersList = usersService.findAll();
+        List<User> usersList = usersService.findAll();
 
         final List<UserResponse> usersListResponse = usersList.stream()
                 .map(UserResponse::newInstance)
@@ -41,11 +41,11 @@ public class UsersController {
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserResponse> fetchUser(@PathVariable(name = "userId") Integer userId) {
-        Users user = usersService.findUser(userId);
+        User user = usersService.findUser(userId);
         if(user == null) {
             return ResponseEntity.noContent().build();
         }
-        final UserResponse userResponse = UserResponse.newPersonInstance(user);
+        final UserResponse userResponse = UserResponse.newDetailedInstance(user);
         return ResponseEntity.ok(userResponse);
     }
 }
