@@ -4,6 +4,7 @@ create table if not exists role
     id      int primary key auto_increment,
     user_id int         not null,
     role    varchar(15) not null,
+    role_id int,
 
     foreign key (user_id) references user (id)
 );
@@ -27,11 +28,11 @@ values ('falcon', 'TomasPinp', 'Tomas Santiago Piñero', '20-39445871-7', 'addre
        ('crow', 'UserPinp', 'Howard Conan', '20-31589741-7', 'address4@email.com');
 
 -- load roles table
-insert into role(user_id, role)
-values (1, 'ROLE_ROOT'),
-       (2, 'ROLE_ROOT'),
-       (1, 'ROLE_ADMIN'),
-       (3, 'ROLE_ADMIN'),
-       (4, 'ROLE_USER');
+insert into role(user_id, role, role_id)
+values (1, 'ROLE_ROOT', 1),
+       (2, 'ROLE_ROOT', 1),
+       (1, 'ROLE_ADMIN', 2),
+       (3, 'ROLE_ADMIN', 2),
+       (4, 'ROLE_USER', 3);
 
 commit;
