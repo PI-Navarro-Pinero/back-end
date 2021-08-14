@@ -1,12 +1,14 @@
 package com.pi.back.web.users;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.pi.back.db.People;
-import com.pi.back.db.Users;
+import com.pi.back.db.Privileges;
+import com.pi.back.db.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -16,24 +18,30 @@ public class UserResponse {
 
     private Integer id;
     private String username;
-    private String role;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private People person;
+    private String fullname;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String cuil;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String email;
+    private List<Privileges> privileges;
 
-    public static final UserResponse newInstance(Users users) {
-        return UserResponse.builder()
-                .id(users.getId())
-                .username(users.getUsername())
-                .role(users.getRole().getRoleName())
-                .build();
-    }
-
-    public static final UserResponse newPersonInstance(Users user) {
+    public static final UserResponse newInstance(User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .role(user.getRole().getRoleName())
-                .person(user.getPerson())
+                .privileges(user.getRoles())
+                .build();
+    }
+
+    public static final UserResponse newDetailedInstance(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .fullname(user.getFullname())
+                .cuil(user.getCuil())
+                .email(user.getEmail())
+                .privileges(user.getRoles())
                 .build();
     }
 }

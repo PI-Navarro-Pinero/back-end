@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -14,20 +16,18 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Table(name = "PEOPLE")
+@Table(name = "ROLE")
 @Entity
-public class People {
+public class Role {
 
     @Id
     @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, name = "FULLNAME")
-    private String fullname;
+    @Column(nullable = false, name = "USER_ID")
+    private Integer userId;
 
-    @Column(nullable = false, name = "CUIL", unique = true)
-    private String cuil;
-
-    @Column(nullable = false, name = "EMAIL", unique = true)
-    private String email;
+    @Column(nullable = false, name = "ROLE")
+    private String roleName;
 }

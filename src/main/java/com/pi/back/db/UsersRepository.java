@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UsersRepository extends JpaRepository<Users,Integer> {
+public interface UsersRepository extends JpaRepository<User,Integer> {
 
-    @Query(value =  "SELECT U FROM Users U WHERE U.id = :userId")
-    Users findUser(int userId);
+    @Query(value =  "SELECT U FROM User U WHERE U.id = :userId")
+    User findUser(int userId);
 }

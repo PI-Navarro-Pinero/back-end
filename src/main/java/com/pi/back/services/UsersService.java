@@ -1,6 +1,6 @@
 package com.pi.back.services;
 
-import com.pi.back.db.Users;
+import com.pi.back.db.User;
 import com.pi.back.db.UsersRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +19,13 @@ public class UsersService {
         this.usersRepository = usersRepository;
     }
 
-    public List<Users> findAll() {
-        final List<Users> users = usersRepository.findAll();
+    public List<User> findAll() {
+        final List<User> users = usersRepository.findAll();
         log.info("{} users found", users.size());
         return users;
     }
 
-    public Users findUser(int userId) {
+    public User findUser(int userId) {
         return usersRepository.findUser(userId);
     }
 }
