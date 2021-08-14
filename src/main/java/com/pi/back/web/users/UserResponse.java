@@ -8,22 +8,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserResponse {
 
     private Integer id;
     private String username;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String fullname;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String cuil;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String email;
+    private String error;
     private List<Privileges> privileges;
 
     public static final UserResponse newInstance(User user) {
@@ -42,6 +42,12 @@ public class UserResponse {
                 .cuil(user.getCuil())
                 .email(user.getEmail())
                 .privileges(user.getRoles())
+                .build();
+    }
+
+    public static UserResponse newErrorInstance(InvalidAttributesException error) {
+        return UserResponse.builder()
+                .error(error.getMessage())
                 .build();
     }
 }

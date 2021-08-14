@@ -17,6 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Table;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -51,5 +52,5 @@ public class User {
     @CollectionTable(name = "ROLE", joinColumns = @JoinColumn(name = "USER_ID", nullable = false))
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false)
-    private List<Privileges> roles;
+    private List<Privileges> roles = Collections.emptyList();
 }

@@ -2,14 +2,19 @@ package com.pi.back.web;
 
 import com.pi.back.db.User;
 import com.pi.back.services.UsersService;
+import com.pi.back.web.users.UserRequest;
 import com.pi.back.web.users.UserResponse;
 import com.pi.back.web.users.UsersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.naming.directory.InvalidAttributesException;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,5 +52,16 @@ public class UsersController {
         }
         final UserResponse userResponse = UserResponse.newDetailedInstance(user);
         return ResponseEntity.ok(userResponse);
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+        try {
+            User createdUser = usersService.create(request);
+            return ResponseEntity.ok(UserResponse.newDetailedInstance(createdUser));
+        }
+        catch (InvalidAttributesException invalidAttributesException) {
+            return ResponseEntity.badRequest().body(UserResponse.newErrorInstance(invalidAttributesException));
+        }
     }
 }
