@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -49,25 +51,73 @@ public class UsersService {
                 .build();
 
         final boolean validEmail = EMAIL_REGEX.matcher(request.getEmail()).matches();
-        if(!validEmail) {
+        if (!validEmail) {
             throw new InvalidAttributesException("Requested user creation failed: Invalid email address.");
         }
         final boolean validCuil = CUIL_REGEX.matcher(request.getCuil()).matches();
-        if(!validCuil) {
+        if (!validCuil) {
             throw new InvalidAttributesException("Requested user creation failed: Invalid CUIL.");
         }
 
         final List<User> allUsers = findAll();
+
         Predicate<User> condition = user -> user.getUsername().equalsIgnoreCase(request.getUsername())
                 || user.getCuil().equals(request.getCuil())
                 || user.getEmail().equals(request.getEmail());
+
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
-        if(conditionMeets) {
+        if (conditionMeets) {
             List<Integer> users = allUsers.stream().filter(condition).map(User::getId).collect(Collectors.toList());
             throw new InvalidAttributesException("Requested user creation failed: " +
                     "A user with the same username, cuil or email already exists: " + users);
         }
 
         return this.usersRepository.save(newUser);
+    }
+
+    public User update(UserRequest request) throws Exception {
+
+        final User userToUpdate = User.builder()
+                .id(request.getId())
+                .username(request.getUsername())
+                .password("default")
+                .fullname(request.getFullname())
+                .cuil(request.getCuil())
+                .email(request.getEmail())
+                .roles(request.getPrivileges())
+                .build();
+
+        if (userToUpdate.getId() == null) {
+            log.info("Null ID provided for user updating.");
+            throw new InvalidParameterException("Requested user update failed: ID must not be null.");
+        }
+
+        final Predicate<User> condition = user ->
+                user.getUsername().equalsIgnoreCase(userToUpdate.getUsername())
+                        && user.getCuil().equals(userToUpdate.getCuil())
+                        && !user.getId().equals(userToUpdate.getId());
+
+        final List<User> allUsers = findAll();
+
+        validateUserExistence(allUsers, userToUpdate.getId());
+
+        final boolean conditionMeets = allUsers.stream().anyMatch(condition);
+        if (conditionMeets) {
+            List<Integer> users = allUsers.stream().filter(condition).map(User::getId).collect(Collectors.toList());
+            throw new InvalidAttributesException("Requested user update failed: " +
+                    "A user with the same username, cuil or email already exists: " + users);
+        }
+
+        return this.usersRepository.save(userToUpdate);
+    }
+
+    private void validateUserExistence(List<User> allUsers, int userToUpdateId) throws ClassNotFoundException {
+        final Optional<User> optionalUser = allUsers.stream()
+                .filter(u -> u.getId() == userToUpdateId)
+                .findFirst();
+
+        if (optionalUser.isEmpty()) {
+            throw new ClassNotFoundException("Requested user update failed: User to update not exists.");
+        }
     }
 }

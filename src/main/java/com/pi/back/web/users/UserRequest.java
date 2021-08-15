@@ -22,6 +22,8 @@ public class UserRequest {
     private static final int CUIL_MAX_LENGHT = 45;
     private static final int EMAIL_MAX_LENGHT = 65;
 
+    private Integer id;
+
     @NotEmpty
     @Size(max = USERNAME_MAX_LENGHT)
     private String username;
