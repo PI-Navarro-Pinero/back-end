@@ -1,0 +1,13 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+.github/
+.git/
+.gitignore
+.dockerignore
+docker-compose.yml
+Dockerfile
+README.md
