@@ -11,6 +11,7 @@ import javax.naming.directory.InvalidAttributesException;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,14 +51,8 @@ public class UsersService {
                 .roles(request.getPrivileges())
                 .build();
 
-        final boolean validEmail = EMAIL_REGEX.matcher(request.getEmail()).matches();
-        if (!validEmail) {
-            throw new InvalidAttributesException("Requested user creation failed: Invalid email address.");
-        }
-        final boolean validCuil = CUIL_REGEX.matcher(request.getCuil()).matches();
-        if (!validCuil) {
-            throw new InvalidAttributesException("Requested user creation failed: Invalid CUIL.");
-        }
+        validateUserAttributes(newUser,r -> EMAIL_REGEX.matcher(r.getEmail()).matches(),"Requested user creation failed: Invalid email address.");
+        validateUserAttributes(newUser,r -> CUIL_REGEX.matcher(r.getCuil()).matches(),"Requested user creation failed: Invalid CUIL.");
 
         final List<User> allUsers = findAll();
 
@@ -92,6 +87,9 @@ public class UsersService {
             throw new InvalidParameterException("Requested user update failed: ID must not be null.");
         }
 
+        validateUserAttributes(userToUpdate,r -> EMAIL_REGEX.matcher(r.getEmail()).matches(),"Requested user update failed: Invalid email address.");
+        validateUserAttributes(userToUpdate,r -> CUIL_REGEX.matcher(r.getCuil()).matches(),"Requested user update failed: Invalid CUIL.");
+
         final Predicate<User> condition = user ->
                 user.getUsername().equalsIgnoreCase(userToUpdate.getUsername())
                         && user.getCuil().equals(userToUpdate.getCuil())
@@ -118,6 +116,15 @@ public class UsersService {
 
         if (optionalUser.isEmpty()) {
             throw new ClassNotFoundException("Requested user update failed: User to update not exists.");
+        }
+    }
+
+    private void validateUserAttributes(User requestToValidate,
+                                        Function<User, Boolean> conditionToMatch,
+                                        String failureMessage) throws InvalidAttributesException {
+        boolean validAttributes = conditionToMatch.apply(requestToValidate);
+        if (!validAttributes) {
+            throw new InvalidAttributesException(failureMessage);
         }
     }
 }
