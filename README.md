@@ -9,14 +9,16 @@
 - docker-compose: [Windows](https://docs.docker.com/compose/install/), [MacOs](https://docs.docker.com/compose/install/),  y [Linux](https://docs.docker.com/compose/install/).
 
 
-## Environment
+<!-- ## Environment
 
-The project needs a working `.env` file to be able to start. It contains the project configurations to be used. You can follow the [**env.example**](env.example) file as reference.
+The project needs a working `.env` file to be able to start. It contains the project configurations to be used. You can follow the [**env.example**](env.example) file as reference. -->
 
 
 ## Running service
 
-If you have already set up your local environment and have a `.env` file with the development variables set, this command builds the image `backend:dev` if not exists and starts the service `backend`:
+<!-- If you have already set up your local environment and have a `.env` file with the development variables set, this command builds the image `backend:dev` if not exists and starts the service `backend`: -->
+
+This command builds the image `backend:dev` if not exists and starts the service `backend`:
 
 ```shell
 $ docker-compose up -d
