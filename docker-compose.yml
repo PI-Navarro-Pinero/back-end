@@ -2,14 +2,14 @@ version: '3.9'
 
 services:
 
-  pinp-backend:
+  backend:
     image: backend:dev
     build: .
-    container_name: pinp-backend
+    container_name: backend
     ports:
       - 8080:8080
     networks:
-      - pinp-backend-net
+      - backend-net
 
 networks:
-  pinp-backend-net:
+  backend-net:
