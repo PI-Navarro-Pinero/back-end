@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
 
 @Data
@@ -45,7 +44,7 @@ public class UserResponse {
                 .build();
     }
 
-    public static UserResponse newErrorInstance(InvalidAttributesException error) {
+    public static UserResponse newErrorInstance(Exception error) {
         return UserResponse.builder()
                 .error(error.getMessage())
                 .build();
