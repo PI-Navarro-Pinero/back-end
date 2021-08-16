@@ -15,6 +15,9 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+        if: github.event_name == 'pull_request'
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.ref }}
         
     - name: Build with Maven
       run: mvn -B package --file pom.xml
