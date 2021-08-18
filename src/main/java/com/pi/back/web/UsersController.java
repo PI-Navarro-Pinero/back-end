@@ -6,15 +6,18 @@ import com.pi.back.web.users.UserRequest;
 import com.pi.back.web.users.UserResponse;
 import com.pi.back.web.users.UsersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.naming.directory.InvalidAttributesException;
 import javax.validation.Valid;
+import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +65,20 @@ public class UsersController {
         }
         catch (InvalidAttributesException invalidAttributesException) {
             return ResponseEntity.badRequest().body(UserResponse.newErrorInstance(invalidAttributesException));
+        }
+    }
+
+    @PutMapping("/users")
+    public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest request) {
+        try {
+            User updatedUser = usersService.update(request);
+            return ResponseEntity.ok(UserResponse.newDetailedInstance(updatedUser));
+        }
+        catch (InvalidParameterException | ClassNotFoundException | InvalidAttributesException e) {
+            return ResponseEntity.badRequest().body(UserResponse.newErrorInstance(e));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

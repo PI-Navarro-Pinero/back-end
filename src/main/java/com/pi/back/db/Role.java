@@ -2,8 +2,10 @@ package com.pi.back.db;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +14,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(of = "roleName")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
@@ -30,4 +34,7 @@ public class Role {
 
     @Column(nullable = false, name = "ROLE")
     private String roleName;
+
+    @Column(nullable = true, name = "ROLE_ID")
+    private Integer roleId;
 }
