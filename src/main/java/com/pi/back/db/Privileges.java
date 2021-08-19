@@ -10,15 +10,15 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum Privileges {
-    ROLE_ROOT(Roles.ROLE_ROOT),
-    ROLE_ADMIN(Roles.ROLE_ADMIN),
-    ROLE_USER(Roles.ROLE_USER);
+    ROLE_R(Roles.ROLE_R),
+    ROLE_W(Roles.ROLE_W),
+    ROLE_X(Roles.ROLE_X);
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Roles {
-        public static final String ROLE_ROOT = "ROLE_ROOT";
-        public static final String ROLE_ADMIN = "ROLE_ADMIN";
-        public static final String ROLE_USER = "ROLE_USER";
+        public static final String ROLE_R = "ROLE_R";
+        public static final String ROLE_W = "ROLE_W";
+        public static final String ROLE_X = "ROLE_X";
     }
 
     private final String role;

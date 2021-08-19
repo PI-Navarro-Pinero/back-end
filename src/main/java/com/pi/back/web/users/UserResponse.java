@@ -20,8 +20,7 @@ public class UserResponse {
     private Integer id;
     private String username;
     private String fullname;
-    private String cuil;
-    private String email;
+    private String license;
     private String error;
     private List<Privileges> privileges;
 
@@ -38,8 +37,7 @@ public class UserResponse {
                 .id(user.getId())
                 .username(user.getUsername())
                 .fullname(user.getFullname())
-                .cuil(user.getCuil())
-                .email(user.getEmail())
+                .license(user.getLicense())
                 .privileges(user.getRoles())
                 .build();
     }

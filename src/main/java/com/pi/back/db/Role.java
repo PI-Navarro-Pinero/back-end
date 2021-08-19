@@ -37,4 +37,6 @@ public class Role {
 
     @Column(nullable = true, name = "ROLE_ID")
     private Integer roleId;
+
+    private String description;
 }

@@ -19,7 +19,7 @@ public class UserRequest {
     private static final int USERNAME_MAX_LENGHT = 50;
     private static final int PASSWORD_MAX_LENGHT = 50;
     private static final int FULLNAME_MAX_LENGHT = 45;
-    private static final int CUIL_MAX_LENGHT = 45;
+    private static final int LICENSE_MAX_LENGHT = 45;
     private static final int EMAIL_MAX_LENGHT = 65;
 
     private Integer id;
@@ -33,16 +33,8 @@ public class UserRequest {
     private String fullname;
 
     @NotEmpty
-    @Size(max = PASSWORD_MAX_LENGHT)
-    private String password;
-
-    @NotEmpty
-    @Size(max = CUIL_MAX_LENGHT)
-    private String cuil;
-
-    @NotEmpty
-    @Size(max = EMAIL_MAX_LENGHT)
-    private String email;
+    @Size(max = LICENSE_MAX_LENGHT)
+    private String license;
 
     private List<Privileges> privileges;
 }

@@ -29,7 +29,7 @@ public class RoleResponse {
         return RoleResponse.builder()
                 .id(role.getRoleId())
                 .role(role.getRoleName())
-                .description(null)
+                .description("role description still in progress ... ")
                 .build();
     }
 }
