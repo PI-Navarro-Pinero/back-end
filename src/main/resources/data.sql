@@ -16,23 +16,17 @@ create table if not exists user
     username varchar(50) unique not null,
     password varchar(50)        not null,
     fullname varchar(45)        not null,
-    cuil     varchar(45) unique not null,
-    email    varchar(65) unique not null
+    license  varchar(45) unique not null
 );
 
 -- load user table
-insert into user(username, password, fullname, cuil, email)
-values ('falcon', 'TomasPinp', 'Tomas Santiago Piñero', '20-39445871-7', 'address1@email.com'),
-       ('hawkeye', 'SebastianPinp', 'Sebastian Navarro', '20-38799486-7', 'address2@email.com'),
-       ('eagle', 'AdminPinp', 'Ronald Smith', '20-40789552-7', 'address3@email.com'),
-       ('crow', 'UserPinp', 'Howard Conan', '20-31589741-7', 'address4@email.com');
+insert into user(id, username, password, fullname, license)
+values (0, 'root', '_root', 'Carl Sagan', '0');
 
 -- load roles table
 insert into role(user_id, role, role_id)
-values (1, 'ROLE_ROOT', 1),
-       (2, 'ROLE_ROOT', 1),
-       (1, 'ROLE_ADMIN', 2),
-       (3, 'ROLE_ADMIN', 2),
-       (4, 'ROLE_USER', 3);
+values (0, 'ROLE_R', 1),
+       (0, 'ROLE_W', 2),
+       (0, 'ROLE_X', 3);
 
 commit;
