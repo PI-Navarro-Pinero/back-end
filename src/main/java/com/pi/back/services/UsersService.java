@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.naming.directory.InvalidAttributesException;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -31,8 +32,8 @@ public class UsersService {
         return users;
     }
 
-    public User findUser(int userId) {
-        return usersRepository.findUser(userId);
+    public User findUser(Integer userId) throws NoSuchElementException {
+        return usersRepository.findById(userId).orElseThrow();
     }
 
     public User create(UserRequest request) throws InvalidAttributesException {
@@ -84,7 +85,8 @@ public class UsersService {
 
         final List<User> allUsers = findAll();
 
-        validateUserExistence(allUsers, userToUpdate.getId());
+        validateUserExistence(allUsers, userToUpdate.getId()
+                , "Requested user update failed: User to update do not exists.");
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
@@ -96,13 +98,24 @@ public class UsersService {
         return this.usersRepository.save(userToUpdate);
     }
 
-    private void validateUserExistence(List<User> allUsers, int userToUpdateId) throws ClassNotFoundException {
+    public void delete(Integer userId) throws NoSuchElementException {
+        final User userToDelete = findUser(userId);
+
+        if (userId == 0 || userToDelete == null) {
+            log.info("Forbidden ID 0 provided for user deleting.");
+            throw new InvalidParameterException("Requested user update failed: Invalid ID.");
+        }
+
+        usersRepository.delete(userToDelete);
+    }
+
+    private void validateUserExistence(List<User> allUsers, int userToUpdateId, String message) throws ClassNotFoundException {
         final Optional<User> optionalUser = allUsers.stream()
                 .filter(u -> u.getId() == userToUpdateId)
                 .findFirst();
 
         if (optionalUser.isEmpty()) {
-            throw new ClassNotFoundException("Requested user update failed: User to update not exists.");
+            throw new ClassNotFoundException(message);
         }
     }
 }

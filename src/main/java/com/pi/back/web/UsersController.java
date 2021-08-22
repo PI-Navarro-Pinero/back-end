@@ -8,6 +8,7 @@ import com.pi.back.web.users.UsersResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import javax.naming.directory.InvalidAttributesException;
 import javax.validation.Valid;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -49,12 +51,17 @@ public class UsersController {
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserResponse> fetchUser(@PathVariable(name = "userId") Integer userId) {
-        User user = usersService.findUser(userId);
-        if(user == null) {
-            return ResponseEntity.noContent().build();
+        try {
+            User user = usersService.findUser(userId);
+            final UserResponse userResponse = UserResponse.newDetailedInstance(user);
+            return ResponseEntity.ok(userResponse);
         }
-        final UserResponse userResponse = UserResponse.newDetailedInstance(user);
-        return ResponseEntity.ok(userResponse);
+        catch(NoSuchElementException noSuchElementException) {
+            return ResponseEntity.notFound().build();
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PostMapping("/users")
@@ -76,6 +83,23 @@ public class UsersController {
         }
         catch (InvalidParameterException | ClassNotFoundException | InvalidAttributesException e) {
             return ResponseEntity.badRequest().body(UserResponse.newErrorInstance(e));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @DeleteMapping ("/users/{userId}")
+    public ResponseEntity<UserResponse> deleteUser(@PathVariable(name = "userId") Integer userId) {
+        try {
+            usersService.delete(userId);
+            return ResponseEntity.ok().build();
+        }
+        catch(NoSuchElementException noSuchElementException) {
+            return ResponseEntity.notFound().build();
+        }
+        catch (InvalidParameterException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(UserResponse.newErrorInstance(e));
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
