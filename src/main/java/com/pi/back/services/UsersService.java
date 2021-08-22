@@ -86,7 +86,7 @@ public class UsersService {
         final List<User> allUsers = findAll();
 
         validateUserExistence(allUsers, userToUpdate.getId()
-                , "Requested user update failed: User to update not exists.");
+                , "Requested user update failed: User to update do not exists.");
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
