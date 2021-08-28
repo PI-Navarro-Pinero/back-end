@@ -42,11 +42,8 @@ public class User {
     @Column(nullable = false, name = "FULLNAME")
     private String fullname;
 
-    @Column(nullable = false, name = "CUIL")
-    private String cuil;
-
-    @Column(nullable = false, name = "EMAIL")
-    private String email;
+    @Column(nullable = false, name = "LICENSE")
+    private String license;
 
     @ElementCollection(targetClass = Privileges.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "ROLE", joinColumns = @JoinColumn(name = "USER_ID", nullable = false))

@@ -10,18 +10,14 @@ import org.springframework.stereotype.Service;
 import javax.naming.directory.InvalidAttributesException;
 import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UsersService {
-
-    final Pattern EMAIL_REGEX = Pattern.compile("[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", Pattern.CASE_INSENSITIVE);
-    final Pattern CUIL_REGEX = Pattern.compile("^[0-9]{2}-[0-9]{8}-[0-9]$");
 
     private final UsersRepository usersRepository;
 
@@ -36,35 +32,31 @@ public class UsersService {
         return users;
     }
 
-    public User findUser(int userId) {
-        return usersRepository.findUser(userId);
+    public User findUser(Integer userId) throws NoSuchElementException {
+        return usersRepository.findById(userId).orElseThrow();
     }
 
     public User create(UserRequest request) throws InvalidAttributesException {
 
         final User newUser = User.builder()
                 .username(request.getUsername())
-                .password("default")
+                .password("_" + request.getUsername())
                 .fullname(request.getFullname())
-                .cuil(request.getCuil())
-                .email(request.getEmail())
+                .license(request.getLicense())
                 .roles(request.getPrivileges())
                 .build();
 
-        validateUserAttributes(newUser,r -> EMAIL_REGEX.matcher(r.getEmail()).matches(),"Requested user creation failed: Invalid email address.");
-        validateUserAttributes(newUser,r -> CUIL_REGEX.matcher(r.getCuil()).matches(),"Requested user creation failed: Invalid CUIL.");
-
         final List<User> allUsers = findAll();
 
-        Predicate<User> condition = user -> user.getUsername().equalsIgnoreCase(request.getUsername())
-                || user.getCuil().equals(request.getCuil())
-                || user.getEmail().equals(request.getEmail());
+        Predicate<User> condition = user ->
+                user.getUsername().equalsIgnoreCase(request.getUsername())
+                || user.getLicense().equals(request.getLicense());
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
             List<Integer> users = allUsers.stream().filter(condition).map(User::getId).collect(Collectors.toList());
             throw new InvalidAttributesException("Requested user creation failed: " +
-                    "A user with the same username, cuil or email already exists: " + users);
+                    "A user with the same username or license already exists: " + users);
         }
 
         return this.usersRepository.save(newUser);
@@ -75,29 +67,26 @@ public class UsersService {
         final User userToUpdate = User.builder()
                 .id(request.getId())
                 .username(request.getUsername())
-                .password("default")
+                .password("_" + request.getUsername())
                 .fullname(request.getFullname())
-                .cuil(request.getCuil())
-                .email(request.getEmail())
+                .license(request.getLicense())
                 .roles(request.getPrivileges())
                 .build();
 
-        if (userToUpdate.getId() == null) {
+        if (userToUpdate.getId().equals(0) || userToUpdate.getId() == null) {
             log.info("Null ID provided for user updating.");
-            throw new InvalidParameterException("Requested user update failed: ID must not be null.");
+            throw new InvalidParameterException("Requested user update failed: Invalid ID.");
         }
-
-        validateUserAttributes(userToUpdate,r -> EMAIL_REGEX.matcher(r.getEmail()).matches(),"Requested user update failed: Invalid email address.");
-        validateUserAttributes(userToUpdate,r -> CUIL_REGEX.matcher(r.getCuil()).matches(),"Requested user update failed: Invalid CUIL.");
 
         final Predicate<User> condition = user ->
                 user.getUsername().equalsIgnoreCase(userToUpdate.getUsername())
-                        && user.getCuil().equals(userToUpdate.getCuil())
+                        && user.getLicense().equals(userToUpdate.getLicense())
                         && !user.getId().equals(userToUpdate.getId());
 
         final List<User> allUsers = findAll();
 
-        validateUserExistence(allUsers, userToUpdate.getId());
+        validateUserExistence(allUsers, userToUpdate.getId()
+                , "Requested user update failed: User to update do not exists.");
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
@@ -109,22 +98,24 @@ public class UsersService {
         return this.usersRepository.save(userToUpdate);
     }
 
-    private void validateUserExistence(List<User> allUsers, int userToUpdateId) throws ClassNotFoundException {
+    public void delete(Integer userId) throws NoSuchElementException {
+        final User userToDelete = findUser(userId);
+
+        if (userId == 0 || userToDelete == null) {
+            log.info("Forbidden ID 0 provided for user deleting.");
+            throw new InvalidParameterException("Requested user update failed: Invalid ID.");
+        }
+
+        usersRepository.delete(userToDelete);
+    }
+
+    private void validateUserExistence(List<User> allUsers, int userToUpdateId, String message) throws ClassNotFoundException {
         final Optional<User> optionalUser = allUsers.stream()
                 .filter(u -> u.getId() == userToUpdateId)
                 .findFirst();
 
         if (optionalUser.isEmpty()) {
-            throw new ClassNotFoundException("Requested user update failed: User to update not exists.");
-        }
-    }
-
-    private void validateUserAttributes(User requestToValidate,
-                                        Function<User, Boolean> conditionToMatch,
-                                        String failureMessage) throws InvalidAttributesException {
-        boolean validAttributes = conditionToMatch.apply(requestToValidate);
-        if (!validAttributes) {
-            throw new InvalidAttributesException(failureMessage);
+            throw new ClassNotFoundException(message);
         }
     }
 }
