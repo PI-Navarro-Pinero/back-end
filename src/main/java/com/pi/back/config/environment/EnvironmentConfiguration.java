@@ -13,18 +13,14 @@ import java.io.File;
 @Configuration
 @ConfigurationProperties(prefix = "pinp")
 @EnableConfigurationProperties
+@Setter
 @Slf4j
 public class EnvironmentConfiguration {
 
-    @Setter
     private String baseDir;
-    @Setter
     private String weaponryDir;
-    @Setter
     private String actionsDir;
-    @Setter
     private String outputsDir;
-    @Setter
     private String logsDir;
 
     @EventListener(ApplicationReadyEvent.class)
