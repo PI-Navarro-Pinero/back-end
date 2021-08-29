@@ -1,5 +1,6 @@
 package com.pi.back.config.environment;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,31 +16,16 @@ import java.io.File;
 @Slf4j
 public class EnvironmentConfiguration {
 
+    @Setter
     private String baseDir;
+    @Setter
     private String weaponryDir;
+    @Setter
     private String actionsDir;
+    @Setter
     private String outputsDir;
+    @Setter
     private String logsDir;
-
-    public void setBaseDir(final String baseDir) {
-        this.baseDir = baseDir;
-    }
-
-    public void setWeaponryDir(final String weaponryDir) {
-        this.weaponryDir = weaponryDir;
-    }
-
-    public void setActionsDir(final String actionsDir) {
-        this.actionsDir = actionsDir;
-    }
-
-    public void setOutputsDir(final String outputsDir) {
-        this.outputsDir = outputsDir;
-    }
-
-    public void setLogsDir(final String logsDir) {
-        this.logsDir = logsDir;
-    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void makeDirectories() {
