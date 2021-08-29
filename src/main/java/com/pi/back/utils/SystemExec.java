@@ -17,7 +17,6 @@ public class SystemExec {
         
         final String OUTPUT = "/" + OUTPUTS_DIR + weaponId;
 
-        // File error = folder.newFile("./.logs/test.log");
         ProcessBuilder procBuilder = new ProcessBuilder(cmd);
 
         try {
@@ -28,7 +27,6 @@ public class SystemExec {
 
             Process proc = procBuilder.start();
 
-//            int exitValue = proc.waitFor();
             log.info("Command '{}' executed", arrayToString(cmd));
             return 0;
         } catch (IOException | SecurityException e) {
