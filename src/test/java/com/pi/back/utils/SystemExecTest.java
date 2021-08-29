@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 
-@SpringBootTest
 public class SystemExecTest {
 
     SystemExec executor;
@@ -24,11 +23,8 @@ public class SystemExecTest {
         String weaponId = "0";
         String actionId = "0";
 
-        executor.executeCommand(cmd, weaponId, actionId);
-        File file = new File("/home/mrgreen/pinp/outputs/0/0");
-        if(file.exists() && file.length() != 0)
-            assert(true);
-        else
-            assert(false);
+        int exitCode = executor.executeCommand(cmd, weaponId, actionId);
+
+        assert(exitCode != -1);
     }
 }
