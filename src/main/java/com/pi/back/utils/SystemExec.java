@@ -9,32 +9,36 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class SystemExec {
-    
-    static final String HOME_PATH = "/home/mrgreen/pinp/";
 
-    public void executeCommand(String cmd[], String weaponId, String actionId) {
+    private static final String BASE_DIR = System.getenv("BASE_DIR");
+    private static final String OUTPUTS_DIR = System.getenv("OUTPUTS_DIR") + "/";
+
+    public int executeCommand(String[] cmd, String weaponId, String actionId) {
         
-        final String OUTPUT_PATH = HOME_PATH + "outputs/" + weaponId + "/" + actionId;
+        final String OUTPUT = "/" + OUTPUTS_DIR + weaponId;
 
         // File error = folder.newFile("./.logs/test.log");
-
         ProcessBuilder procBuilder = new ProcessBuilder(cmd);
-        procBuilder.directory(new File(HOME_PATH));
-        
-        procBuilder.redirectOutput(new File (OUTPUT_PATH));
 
         try {
+
+            File action = new File(System.getProperty("user.dir") + "/" + BASE_DIR + OUTPUT + "/" + actionId);
+            action.getParentFile().mkdirs();
+            procBuilder.redirectOutput(action);
+
             Process proc = procBuilder.start();
 
             int exitValue = proc.waitFor();
-            log.info("Exit code {}", exitValue);
-            log.info("Command: {}", arrayToString(cmd));
+            log.info("Command '{}' finished with exit code {}", arrayToString(cmd), exitValue);
+            return exitValue;
         } catch (InterruptedException | IOException | SecurityException e) {
             e.printStackTrace();
         }
+
+        return -1;
     }
 
-    private String arrayToString(String str[]) {
+    private String arrayToString(String[] str) {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
 
