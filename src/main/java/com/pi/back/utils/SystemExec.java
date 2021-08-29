@@ -28,10 +28,10 @@ public class SystemExec {
 
             Process proc = procBuilder.start();
 
-            int exitValue = proc.waitFor();
-            log.info("Command '{}' finished with exit code {}", arrayToString(cmd), exitValue);
-            return exitValue;
-        } catch (InterruptedException | IOException | SecurityException e) {
+//            int exitValue = proc.waitFor();
+            log.info("Command '{}' executed", arrayToString(cmd));
+            return 0;
+        } catch (IOException | SecurityException e) {
             e.printStackTrace();
         }
 
