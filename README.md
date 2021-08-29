@@ -9,10 +9,14 @@
 - docker-compose: [Windows](https://docs.docker.com/compose/install/), [MacOs](https://docs.docker.com/compose/install/),  y [Linux](https://docs.docker.com/compose/install/).
 
 
-<!-- ## Environment
+## Environment
 
-The project needs a working `.env` file to be able to start. It contains the project configurations to be used. You can follow the [**env.example**](env.example) file as reference. -->
+The project needs a working `.env` file to be able to start. There is a default file named 'env.example' which you can use as an example.
+So you can create your environment file for development with:
 
+```bash
+cp env.example .env
+```
 
 ## Running service
 
