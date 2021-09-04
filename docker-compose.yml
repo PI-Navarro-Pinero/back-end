@@ -3,13 +3,20 @@ version: '3.9'
 services:
 
   backend:
+    env_file:
+      - .env
     image: backend:dev
     build: .
     container_name: backend
     ports:
       - 8080:8080
+    volumes:
+      - pinp-vol:/pinp/
     networks:
       - backend-net
+
+volumes:
+  pinp-vol: {}
 
 networks:
   backend-net:
