@@ -1,5 +1,6 @@
 package com.pi.back.db;
 
+import com.pi.back.config.security.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -13,6 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Arrays;
+import java.util.List;
 
 @Getter
 @Setter
@@ -35,8 +38,17 @@ public class Role {
     @Column(nullable = false, name = "ROLE")
     private String roleName;
 
-    @Column(nullable = true, name = "ROLE_ID")
+    @Column(name = "ROLE_ID")
     private Integer roleId;
 
     private String description;
+
+    public String getDescription() {
+        List<Privileges> roles = Arrays.asList(Privileges.ROLE_R, Privileges.ROLE_W, Privileges.ROLE_X);
+        return roles.stream()
+                .filter(privileges -> privileges.getRole().equals(roleName))
+                .findFirst()
+                .map(Privileges::getDescription)
+                .orElse("Description not available");
+    }
 }
