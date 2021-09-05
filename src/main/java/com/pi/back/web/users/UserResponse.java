@@ -1,7 +1,7 @@
 package com.pi.back.web.users;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.pi.back.db.Privileges;
+import com.pi.back.config.security.Privileges;
 import com.pi.back.db.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

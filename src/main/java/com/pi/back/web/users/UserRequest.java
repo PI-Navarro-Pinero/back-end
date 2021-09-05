@@ -1,6 +1,6 @@
 package com.pi.back.web.users;
 
-import com.pi.back.db.Privileges;
+import com.pi.back.config.security.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +17,7 @@ import java.util.List;
 public class UserRequest {
 
     private static final int USERNAME_MAX_LENGHT = 50;
-    private static final int PASSWORD_MAX_LENGHT = 50;
+    private static final int PASSWORD_MAX_LENGHT = 150;
     private static final int FULLNAME_MAX_LENGHT = 45;
     private static final int LICENSE_MAX_LENGHT = 45;
     private static final int EMAIL_MAX_LENGHT = 65;

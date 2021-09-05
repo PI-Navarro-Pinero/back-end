@@ -5,6 +5,7 @@ import com.pi.back.db.UsersRepository;
 import com.pi.back.web.users.UserRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
@@ -20,15 +21,18 @@ import java.util.stream.Collectors;
 public class UsersService {
 
     private final UsersRepository usersRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UsersService(UsersRepository usersRepository) {
+    public UsersService(UsersRepository usersRepository,
+                        BCryptPasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> findAll() {
         final List<User> users = usersRepository.findAll();
-        log.info("{} users found", users.size());
+        log.info("{} " + ((users.size() == 1) ? "user" : "users") + " found in repository", users.size());
         return users;
     }
 
@@ -40,7 +44,7 @@ public class UsersService {
 
         final User newUser = User.builder()
                 .username(request.getUsername())
-                .password("_" + request.getUsername())
+                .password(passwordEncoder.encode("_" + request.getUsername()))
                 .fullname(request.getFullname())
                 .license(request.getLicense())
                 .roles(request.getPrivileges())

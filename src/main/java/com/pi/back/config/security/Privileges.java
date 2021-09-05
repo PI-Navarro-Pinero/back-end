@@ -1,4 +1,4 @@
-package com.pi.back.db;
+package com.pi.back.config.security;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,9 +10,9 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum Privileges {
-    ROLE_R(Roles.ROLE_R),
-    ROLE_W(Roles.ROLE_W),
-    ROLE_X(Roles.ROLE_X);
+    ROLE_R(Roles.ROLE_R, "Descripción del rol de lectura"),
+    ROLE_W(Roles.ROLE_W, "Descripción del rol de escritura"),
+    ROLE_X(Roles.ROLE_X, "Descripcion del rol de ejecución");
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Roles {
@@ -22,4 +22,5 @@ public enum Privileges {
     }
 
     private final String role;
+    private final String description;
 }
