@@ -1,4 +1,4 @@
-package com.pi.back.db;
+package com.pi.back.config.security;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

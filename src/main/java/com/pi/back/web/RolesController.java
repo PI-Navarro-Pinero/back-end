@@ -6,14 +6,15 @@ import com.pi.back.web.roles.RoleResponse;
 import com.pi.back.web.roles.RolesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static com.pi.back.config.security.Privileges.Roles.ROLE_R;
 
 @RestController
 public class RolesController {
@@ -25,6 +26,7 @@ public class RolesController {
         this.rolesService = rolesService;
     }
 
+    @Secured(ROLE_R)
     @GetMapping("/roles")
     public ResponseEntity<RolesResponse> fetchRoles() {
         List<Role> rolesList = rolesService.findAll();
@@ -43,6 +45,7 @@ public class RolesController {
                 .build());
     }
 
+    @Secured(ROLE_R)
     @GetMapping("/roles/{roleId}")
     public ResponseEntity<RoleResponse> fetchRole(@PathVariable(name = "roleId") Integer roleId) {
         List<Role> rolesList = rolesService.findAll();
