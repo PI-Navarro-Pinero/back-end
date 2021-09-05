@@ -80,13 +80,17 @@ public class UsersController {
     }
 
     @Secured(ROLE_W)
-    @PutMapping("/users")
-    public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest request) {
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest request,
+                                                   @PathVariable(name = "userId") Integer userId) {
+        request.setId(userId);
         try {
             User updatedUser = usersService.update(request);
             return ResponseEntity.ok(UserResponse.newDetailedInstance(updatedUser));
-        } catch (InvalidParameterException | ClassNotFoundException | InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(UserResponse.newErrorInstance(e));
+        } catch (InvalidParameterException | InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(UserResponse.newErrorInstance(e));
+        } catch (ClassNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(UserResponse.newErrorInstance(e));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

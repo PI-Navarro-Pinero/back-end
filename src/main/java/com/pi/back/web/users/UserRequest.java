@@ -24,15 +24,15 @@ public class UserRequest {
 
     private Integer id;
 
-    @NotEmpty
+    @NotEmpty(message = "username must be provided")
     @Size(max = USERNAME_MAX_LENGHT)
     private String username;
 
-    @NotEmpty
+    @NotEmpty(message = "name must be provided")
     @Size(max = FULLNAME_MAX_LENGHT)
     private String fullname;
 
-    @NotEmpty
+    @NotEmpty(message = "license must be provided")
     @Size(max = LICENSE_MAX_LENGHT)
     private String license;
 

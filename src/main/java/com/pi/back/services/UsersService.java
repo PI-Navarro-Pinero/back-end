@@ -83,20 +83,20 @@ public class UsersService {
         }
 
         final Predicate<User> condition = user ->
-                user.getUsername().equalsIgnoreCase(userToUpdate.getUsername())
-                        && user.getLicense().equals(userToUpdate.getLicense())
+                (user.getUsername().equalsIgnoreCase(userToUpdate.getUsername())
+                        || user.getLicense().equals(userToUpdate.getLicense()))
                         && !user.getId().equals(userToUpdate.getId());
 
         final List<User> allUsers = findAll();
 
-        validateUserExistence(allUsers, userToUpdate.getId()
-                , "Requested user update failed: User to update do not exists.");
+        validateUserExistence(allUsers, userToUpdate.getId(),
+                "Requested user update failed: User to update do not exists.");
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
             List<Integer> users = allUsers.stream().filter(condition).map(User::getId).collect(Collectors.toList());
             throw new InvalidAttributesException("Requested user update failed: " +
-                    "A user with the same username, cuil or email already exists: " + users);
+                    "A user with the same username or license already exists: " + users);
         }
 
         return this.usersRepository.save(userToUpdate);
