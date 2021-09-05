@@ -1,5 +1,6 @@
 package com.pi.back.db;
 
+import com.pi.back.config.security.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
