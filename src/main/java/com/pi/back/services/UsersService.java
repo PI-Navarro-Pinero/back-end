@@ -78,7 +78,7 @@ public class UsersService {
                 .build();
 
         if (userToUpdate.getId().equals(0) || userToUpdate.getId() == null) {
-            log.info("Null ID provided for user updating.");
+            log.info("Provided id for user updating was null or 0.");
             throw new InvalidParameterException("Requested user update failed: Invalid ID.");
         }
 
