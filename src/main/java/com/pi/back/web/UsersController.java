@@ -74,8 +74,10 @@ public class UsersController {
         try {
             User createdUser = usersService.create(request);
             return ResponseEntity.ok(UserResponse.newDetailedInstance(createdUser));
-        } catch (InvalidAttributesException invalidAttributesException) {
-            return ResponseEntity.badRequest().body(UserResponse.newErrorInstance(invalidAttributesException));
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(UserResponse.newErrorInstance(e));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
