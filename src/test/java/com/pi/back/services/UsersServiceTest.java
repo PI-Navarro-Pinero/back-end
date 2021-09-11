@@ -258,11 +258,13 @@ class UsersServiceTest {
             User mockUserToUpdate = User.builder()
                     .id(mockUserRequest.getId())
                     .username(mockUserRequest.getUsername())
+                    .password("_" + mockUserRequest.getUsername())
                     .fullname(mockUserRequest.getFullname())
                     .roles(mockUserRequest.getPrivileges())
                     .license(mockUserRequest.getLicense())
                     .build();
 
+            when(passwordEncoder.encode(any())).thenReturn("_" + mockUserRequest.getUsername());
             when(usersRepository.findAll()).thenReturn(createUsers());
 
             sut.update(mockUserRequest);
@@ -284,11 +286,13 @@ class UsersServiceTest {
             User mockUserToUpdate = User.builder()
                     .id(mockUserRequest.getId())
                     .username(mockUserRequest.getUsername())
+                    .password("_" + mockUserRequest.getUsername())
                     .fullname(mockUserRequest.getFullname())
                     .roles(mockUserRequest.getPrivileges())
                     .license(mockUserRequest.getLicense())
                     .build();
 
+            when(passwordEncoder.encode(any())).thenReturn("_" + mockUserRequest.getUsername());
             when(usersRepository.findAll()).thenReturn(createUsers());
 
             sut.update(mockUserRequest);

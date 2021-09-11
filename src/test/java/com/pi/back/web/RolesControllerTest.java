@@ -1,6 +1,6 @@
 package com.pi.back.web;
 
-import com.pi.back.db.Role;
+import com.pi.back.config.security.Privileges;
 import com.pi.back.services.RolesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RolesControllerTest {
 
     private static final String ROLES_URI_PATH = "/roles";
-    private static final String ROLE_URI_PATH = "/roles/1";
 
     private MockMvc mockMvc;
 
@@ -47,9 +46,7 @@ class RolesControllerTest {
         @Test
         @DisplayName("when roles are found then return 200 ok")
         void rolesFound() throws Exception {
-            Role mockRole = createMockRole();
-
-            List<Role> roleList = List.of(mockRole);
+            List<Privileges> roleList = List.of(Privileges.ROLE_R);
 
             when(rolesService.findAll()).thenReturn(roleList);
 
@@ -57,14 +54,14 @@ class RolesControllerTest {
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.roles", hasSize(1)))
-                    .andExpect(jsonPath("$.roles.[0].id", is(mockRole.getRoleId())))
-                    .andExpect(jsonPath("$.roles.[0].role", is(mockRole.getRoleName())));
+                    .andExpect(jsonPath("$.roles.[0].id", is(roleList.get(0).getRoleId())))
+                    .andExpect(jsonPath("$.roles.[0].role", is(roleList.get(0).getRole())));
         }
 
         @Test
         @DisplayName("when no roles are found then return 204 no content")
         void rolesNotFound() throws Exception {
-            List<Role> roleList = List.of();
+            List<Privileges> roleList = List.of();
 
             when(rolesService.findAll()).thenReturn(roleList);
 
@@ -80,42 +77,31 @@ class RolesControllerTest {
 
         @Test
         @DisplayName("when specific role is found then return 200 ok")
-        void roleFound() throws Exception {
-            Role mockRole = createMockRole();
-
-            List<Role> roleList = List.of(mockRole);
+        void roleOneFound() throws Exception {
+            List<Privileges> roleList = List.of(Privileges.ROLE_R, Privileges.ROLE_W, Privileges.ROLE_X);
 
             when(rolesService.findAll()).thenReturn(roleList);
 
-            mockMvc.perform(get(ROLE_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id", is(mockRole.getRoleId())))
-                    .andExpect(jsonPath("$.role", is(mockRole.getRoleName())))
-                    .andExpect(jsonPath("$.description", is(mockRole.getDescription())));
+            for (int id = 0; id < roleList.size(); id++) {
+                mockMvc.perform(get("/roles/" + (id + 1))
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id", is(roleList.get(id).getRoleId())))
+                        .andExpect(jsonPath("$.role", is(roleList.get(id).getRole())))
+                        .andExpect(jsonPath("$.description", is(roleList.get(id).getDescription())));
+            }
         }
 
         @Test
         @DisplayName("when specific role is not found then return 204 no content")
         void roleNotFound() throws Exception {
-            List<Role> roleList = List.of();
+            List<Privileges> roleList = List.of();
 
             when(rolesService.findAll()).thenReturn(roleList);
 
-            mockMvc.perform(get(ROLE_URI_PATH)
+            mockMvc.perform(get("/roles/1")
                     .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNoContent());
         }
-    }
-
-    private Role createMockRole() {
-        System.out.println("role creado");
-        return Role.builder()
-                .id(1)
-                .roleId(1)
-                .roleName("foo")
-                .userId(1)
-                .description("bar")
-                .build();
     }
 }

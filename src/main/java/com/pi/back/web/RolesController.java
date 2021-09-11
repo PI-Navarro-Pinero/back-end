@@ -1,6 +1,6 @@
 package com.pi.back.web;
 
-import com.pi.back.db.Role;
+import com.pi.back.config.security.Privileges;
 import com.pi.back.services.RolesService;
 import com.pi.back.web.roles.RoleResponse;
 import com.pi.back.web.roles.RolesResponse;
@@ -29,9 +29,9 @@ public class RolesController {
     @Secured(ROLE_R)
     @GetMapping("/roles")
     public ResponseEntity<RolesResponse> fetchRoles() {
-        List<Role> rolesList = rolesService.findAll();
+        List<Privileges> privilegesList = rolesService.findAll();
 
-        final List<RoleResponse> rolesListResponse = rolesList.stream()
+        final List<RoleResponse> rolesListResponse = privilegesList.stream()
                 .distinct()
                 .map(RoleResponse::newInstance)
                 .collect(Collectors.toList());
@@ -48,7 +48,7 @@ public class RolesController {
     @Secured(ROLE_R)
     @GetMapping("/roles/{roleId}")
     public ResponseEntity<RoleResponse> fetchRole(@PathVariable(name = "roleId") Integer roleId) {
-        List<Role> rolesList = rolesService.findAll();
+        List<Privileges> rolesList = rolesService.findAll();
 
         return rolesList.stream()
                 .distinct()

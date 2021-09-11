@@ -1,7 +1,7 @@
 package com.pi.back.web.roles;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.pi.back.db.Role;
+import com.pi.back.config.security.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,18 +18,18 @@ public class RoleResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
-    public static final RoleResponse newInstance(Role role) {
+    public static final RoleResponse newInstance(Privileges privilege) {
         return RoleResponse.builder()
-                .id(role.getRoleId())
-                .role(role.getRoleName())
+                .id(privilege.getRoleId())
+                .role(privilege.getRole())
                 .build();
     }
 
-    public static final RoleResponse newDetailedInstance(Role role) {
+    public static final RoleResponse newDetailedInstance(Privileges privilege) {
         return RoleResponse.builder()
-                .id(role.getRoleId())
-                .role(role.getRoleName())
-                .description(role.getDescription())
+                .id(privilege.getRoleId())
+                .role(privilege.getRole())
+                .description(privilege.getDescription())
                 .build();
     }
 }

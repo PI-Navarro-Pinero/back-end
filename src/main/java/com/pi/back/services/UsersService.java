@@ -71,6 +71,7 @@ public class UsersService {
         final User userToUpdate = User.builder()
                 .id(request.getId())
                 .username(request.getUsername())
+                .password(passwordEncoder.encode("_" + request.getUsername()))
                 .fullname(request.getFullname())
                 .license(request.getLicense())
                 .roles(request.getPrivileges())
