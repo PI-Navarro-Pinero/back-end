@@ -24,8 +24,4 @@ public class RolesService {
         log.info("{} roles found", roles.size());
         return roles;
     }
-
-    public Role findRole(int roleId) {
-        return rolesRepository.findRole(roleId);
-    }
 }

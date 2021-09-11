@@ -71,14 +71,18 @@ public class UsersService {
         final User userToUpdate = User.builder()
                 .id(request.getId())
                 .username(request.getUsername())
-                .password("_" + request.getUsername())
                 .fullname(request.getFullname())
                 .license(request.getLicense())
                 .roles(request.getPrivileges())
                 .build();
 
-        if (userToUpdate.getId().equals(0) || userToUpdate.getId() == null) {
-            log.info("Provided id for user updating was null or 0.");
+        if (userToUpdate.getId() == null) {
+            log.error("Provided id for user updating was null.");
+            throw new InvalidParameterException("Requested user update failed: Invalid ID.");
+        }
+
+        if (userToUpdate.getId().equals(0)) {
+            log.error("Provided id for user updating was 0.");
             throw new InvalidParameterException("Requested user update failed: Invalid ID.");
         }
 
@@ -103,14 +107,19 @@ public class UsersService {
     }
 
     public void delete(Integer userId) throws NoSuchElementException {
-        final User userToDelete = findUser(userId);
+        final Optional<User> userToDelete = usersRepository.findById(userId);
 
-        if (userId == 0 || userToDelete == null) {
-            log.info("Forbidden ID 0 provided for user deleting.");
+        if (userToDelete.isEmpty()) {
+            log.error("Non-existent user with id {} requested for deleting.", userId);
+            throw new InvalidParameterException("Requested user deletion failed: User with such ID does not exist.");
+        }
+
+        if (userId == 0) {
+            log.error("Forbidden ID (0) provided for user deleting.");
             throw new InvalidParameterException("Requested user update failed: Invalid ID.");
         }
 
-        usersRepository.delete(userToDelete);
+        usersRepository.delete(userToDelete.get());
     }
 
     private void validateUserExistence(List<User> allUsers, int userToUpdateId, String message) throws ClassNotFoundException {

@@ -59,7 +59,7 @@ class UsersControllerTest {
 
     @Nested
     @DisplayName("GET /users")
-    class fetchUsers {
+    class fetchUsersTest {
 
         @Test
         @DisplayName("when one user is found then return 200 ok")
@@ -88,7 +88,7 @@ class UsersControllerTest {
 
     @Nested
     @DisplayName("GET /users/{userId}")
-    class fetchUser {
+    class fetchUserTest {
 
         @Test
         @DisplayName("when user is found then return 200 ok")
@@ -128,7 +128,7 @@ class UsersControllerTest {
 
     @Nested
     @DisplayName("POST /users")
-    class createUser {
+    class createUserTest {
 
         UserRequest mockRequest = createMockRequest();
 
@@ -174,7 +174,7 @@ class UsersControllerTest {
 
     @Nested
     @DisplayName("PUT /users/{userId}")
-    class updateUser {
+    class updateUserTest {
 
         UserRequest mockRequest = createMockRequest();
 
@@ -245,7 +245,7 @@ class UsersControllerTest {
 
     @Nested
     @DisplayName("DELETE /users/{userId}")
-    class deleteUser {
+    class deleteUserTest {
 
         @Test
         @DisplayName("when deleted user then return 200 ok")

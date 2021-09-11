@@ -45,6 +45,7 @@ public class Role {
 
     public String getDescription() {
         List<Privileges> roles = Arrays.asList(Privileges.ROLE_R, Privileges.ROLE_W, Privileges.ROLE_X);
+
         return roles.stream()
                 .filter(privileges -> privileges.getRole().equals(roleName))
                 .findFirst()
