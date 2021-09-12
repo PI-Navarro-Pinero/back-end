@@ -93,7 +93,7 @@ class RolesControllerTest {
         }
 
         @Test
-        @DisplayName("when specific role is not found then return 204 no content")
+        @DisplayName("when specific role is not found then return 404 not found")
         void roleNotFound() throws Exception {
             List<Privileges> roleList = List.of();
 
@@ -101,7 +101,7 @@ class RolesControllerTest {
 
             mockMvc.perform(get("/roles/1")
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNoContent());
+                    .andExpect(status().isNotFound());
         }
     }
 }
