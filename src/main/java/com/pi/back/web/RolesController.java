@@ -56,6 +56,6 @@ public class RolesController {
                 .findFirst()
                 .map(RoleResponse::newDetailedInstance)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 }
