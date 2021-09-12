@@ -308,20 +308,20 @@ class UsersServiceTest {
         @Test
         @DisplayName("when user to delete has id 0 then throw InvalidParameterException")
         void deleteUserWithIdZero() {
-            when(usersRepository.findById(any())).thenReturn(Optional.empty());
-
-            assertThrows(InvalidParameterException.class, () -> sut.delete(any()));
-        }
-
-        @Test
-        @DisplayName("when user to delete has id null then throw InvalidParameterException")
-        void deleteUserWithIdNull() {
             User mockUserToDelete = User.builder()
                     .build();
 
             when(usersRepository.findById(any())).thenReturn(Optional.of(mockUserToDelete));
 
             assertThrows(InvalidParameterException.class, () -> sut.delete(0));
+        }
+
+        @Test
+        @DisplayName("when user to delete has non existent then throw NoSuchElementException")
+        void deleteUserWithIdNull() {
+            when(usersRepository.findById(any())).thenReturn(Optional.empty());
+
+            assertThrows(NoSuchElementException.class, () -> sut.delete(any()));
         }
 
         @Test

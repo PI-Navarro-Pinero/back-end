@@ -110,9 +110,9 @@ public class UsersService {
     public void delete(Integer userId) throws NoSuchElementException {
         final Optional<User> userToDelete = usersRepository.findById(userId);
 
-        if (userToDelete.isEmpty()) {
+        if (userToDelete.isEmpty()) { // esto debiera retornar NoSuchElementException
             log.error("Non-existent user with id {} requested for deleting.", userId);
-            throw new InvalidParameterException("Requested user deletion failed: User with such ID does not exist.");
+            throw new NoSuchElementException("Requested user deletion failed: User with such ID does not exist.");
         }
 
         if (userId == 0) {
