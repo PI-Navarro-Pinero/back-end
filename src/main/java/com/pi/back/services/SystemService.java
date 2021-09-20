@@ -22,6 +22,8 @@ import java.util.stream.Stream;
 public class SystemService {
 
     private static final String ACTIONS_DIR = System.getenv("ACTIONS_DIR");
+    private static final String BASE_DIR = System.getenv("BASE_DIR");
+    private static final String OUTPUTS_DIR = System.getenv("OUTPUTS_DIR") + "/";
 
     Map<Integer, Map<Integer, String>> actionsFilesMap;
 
@@ -32,14 +34,30 @@ public class SystemService {
     public String retrieveCommandModel(Integer weaponId, Integer actionId) {
         try {
             return actionsFilesMap.get(weaponId).get(actionId);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             log.error("Error when trying to retrieve command model with weaponId {} and actionId {}", weaponId, actionId);
             return null;
         }
     }
 
-    public boolean run(String command) {
+    public boolean run(String cmd, String weaponId, String actionId) {
+        final String OUTPUT = OUTPUTS_DIR + weaponId;
+
+        ProcessBuilder procBuilder = new ProcessBuilder(/*cmd*/"ls","-l", "-a", "--author");
+
+        try {
+            File action = new File(OUTPUT);
+            action.getParentFile().mkdirs();
+            procBuilder.redirectOutput(action);
+
+            Process proc = procBuilder.start();
+
+            log.info("Command '{}' executed", cmd);
+            return true;
+        } catch (IOException | SecurityException e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
@@ -72,5 +90,20 @@ public class SystemService {
         }
 
         return actionsMap;
+    }
+
+    private String arrayToString(String[] str) {
+        StringBuilder builder = new StringBuilder();
+        boolean first = true;
+
+        for (String s : str) {
+            if (!first)
+                builder.append(' ');
+
+            builder.append(s);
+            first = false;
+        }
+
+        return builder.toString();
     }
 }
