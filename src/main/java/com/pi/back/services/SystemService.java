@@ -21,9 +21,9 @@ import java.util.stream.Stream;
 @Slf4j
 public class SystemService {
 
-    private static final String ACTIONS_DIR = System.getenv("ACTIONS_DIR");
     private static final String BASE_DIR = System.getenv("BASE_DIR");
-    private static final String OUTPUTS_DIR = System.getenv("OUTPUTS_DIR") + "/";
+    private static final String OUTPUTS_DIR = BASE_DIR + "outputs/";
+    private static final String ACTIONS_DIR = BASE_DIR + "actions/";
 
     Map<Integer, Map<Integer, String>> actionsFilesMap;
 
@@ -41,7 +41,7 @@ public class SystemService {
     }
 
     public boolean run(String cmd, String weaponId, String actionId) {
-        final String OUTPUT = OUTPUTS_DIR + weaponId;
+        final String OUTPUT = OUTPUTS_DIR + weaponId + "/" + actionId;
 
         ProcessBuilder procBuilder = new ProcessBuilder(/*cmd*/"ls","-l", "-a", "--author");
 
