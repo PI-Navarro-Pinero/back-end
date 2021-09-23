@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 public class SystemService {
 
     private static final String BASE_DIR = System.getenv("BASE_DIR");
-    private static final String OUTPUTS_DIR = BASE_DIR + "outputs/";
-    private static final String ACTIONS_DIR = BASE_DIR + "actions/";
+    private static final String OUTPUTS_DIR = BASE_DIR + "/outputs/";
+    private static final String ACTIONS_DIR = BASE_DIR + "/actions/";
 
     Map<Integer, Map<Integer, String>> actionsFilesMap;
 
@@ -76,8 +76,6 @@ public class SystemService {
             throw new FileSystemException("Error creating output path file");
         }
 
-    public boolean run(String cmd, String weaponId, String actionId) {
-        final String OUTPUT = OUTPUTS_DIR + weaponId + "/" + actionId;
         List<String> splitCommand = List.of(command.split(" "));
 
         ProcessBuilder procBuilder = new ProcessBuilder(splitCommand);
