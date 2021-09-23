@@ -3,9 +3,6 @@ package com.pi.back.utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.io.File;
 
 public class SystemExecTest {
 
