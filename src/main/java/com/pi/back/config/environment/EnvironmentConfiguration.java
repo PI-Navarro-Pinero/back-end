@@ -18,10 +18,10 @@ import java.io.File;
 public class EnvironmentConfiguration {
 
     private String baseDir;
-    private String weaponryDir;
-    private String actionsDir;
-    private String outputsDir;
-    private String logsDir;
+    private String weaponryDir = "weaponry/";
+    private String actionsDir  = "actions/";
+    private String outputsDir  = "outputs/";
+    private String logsDir     = ".logs/";
 
     @EventListener(ApplicationReadyEvent.class)
     public void makeDirectories() {
@@ -29,19 +29,29 @@ public class EnvironmentConfiguration {
         File parent = new File(baseDir);
         String[] children= {weaponryDir, actionsDir, outputsDir, logsDir};
 
-        if (!parent.exists()) {
-            parent.mkdir();
-            log.info("Created base directory: {}", parent);
-        } else
-            log.info("'{}' is the base directory.", parent);
+        if(!parent.isAbsolute()) {
+            log.error("Base directory '{}' is not absolute", parent);
+        }
 
-        for(String child : children){
+        if(!parent.canWrite()) {
+            log.error("Can't write to {}. I don't have the right permissions", parent);
+        }
+
+        if (!parent.exists()) {
+            if (parent.mkdir())
+                log.info("Created base directory: {}", parent);
+            else
+                log.info("'{}' is the base directory.", parent);
+        }
+
+        for(String child : children) {
             File sub = new File(parent, child);
             if(!sub.exists()) {
-                sub.mkdir();
-                log.info("Created '{}' directory", child);
-            } else
-                log.info("'{}' directory already exists.", child);
+                if (sub.mkdir())
+                    log.info("Created '{}' directory", child);
+                else
+                    log.info("'{}' directory already exists.", child);
+            }
         }
     }
 }
