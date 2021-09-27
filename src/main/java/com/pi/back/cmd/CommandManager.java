@@ -14,10 +14,13 @@ public class CommandManager {
 
     Pattern COMMAND_MODEL_PATTERN = Pattern.compile("(\\[.*?\\])");
 
-    public boolean validateUserInput(String commandModel, int queryParamsSize) {
+    public boolean validateUserInput(String commandModel, List<String> queryParamsSize) {
         Matcher commandMatcher = COMMAND_MODEL_PATTERN.matcher(commandModel);
 
-        return commandMatcher.results().count() == queryParamsSize;
+        if (queryParamsSize != null)
+            return commandMatcher.results().count() == queryParamsSize.size();
+
+        return false;
     }
 
     public String buildCommand(String commandModel, List<String> queryParamsList) {

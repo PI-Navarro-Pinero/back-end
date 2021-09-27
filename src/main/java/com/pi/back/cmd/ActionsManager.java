@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Data
@@ -20,7 +21,8 @@ public class ActionsManager {
         actionsFilesMap.put(i, m);
     }
 
-    public String queryActionsMap(Integer weaponId, Integer actionId) {
-        return actionsFilesMap.get(weaponId).get(actionId);
+    public Optional<String> queryActionsMap(Integer weaponId, Integer actionId) {
+        return Optional.ofNullable(actionsFilesMap.get(weaponId))
+                .map(w -> w.get(actionId));
     }
 }
