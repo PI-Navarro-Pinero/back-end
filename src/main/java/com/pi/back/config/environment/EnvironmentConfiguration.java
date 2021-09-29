@@ -29,12 +29,8 @@ public class EnvironmentConfiguration {
         File parent = new File(baseDir);
         String[] children= {weaponryDir, actionsDir, outputsDir, logsDir};
 
-        if(!parent.isAbsolute()) {
-            log.error("Base directory '{}' is not absolute", parent);
-        }
-
         if(!parent.canWrite()) {
-            log.error("Can't write to {}. I don't have the right permissions", parent);
+            log.error("Can't write into {}. I don't have the right permissions", parent);
         }
 
         if (!parent.exists()) {
