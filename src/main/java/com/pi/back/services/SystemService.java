@@ -1,9 +1,9 @@
 package com.pi.back.services;
 
-import com.pi.back.cmd.ActionsManager;
-import com.pi.back.cmd.CommandManager;
-import com.pi.back.cmd.WeaponsManager;
 import com.pi.back.utils.FileSystem;
+import com.pi.back.weaponry.CommandManager;
+import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +12,7 @@ import javax.naming.directory.InvalidAttributesException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -22,14 +23,12 @@ public class SystemService {
     private final String OUTPUTS_DIR = FileSystem.OUTPUTS.getPath();
 
     private final CommandManager commandManager;
-    private final WeaponsManager weaponsManager;
-    private final ActionsManager actionsManager;
+    private final WeaponsRepository weaponsRepository;
 
     @Autowired
-    public SystemService(CommandManager commandManager, WeaponsManager weaponsManager, ActionsManager actionsManager) {
+    public SystemService(CommandManager commandManager, WeaponsRepository weaponsRepository) {
         this.commandManager = commandManager;
-        this.weaponsManager = weaponsManager;
-        this.actionsManager = actionsManager;
+        this.weaponsRepository = weaponsRepository;
     }
 
     public boolean run(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, ExecutionException {
@@ -55,20 +54,30 @@ public class SystemService {
         return true;
     }
 
+    public Map<Integer, Weapon> getAvailableWeapons() {
+        return weaponsRepository.getWeaponsMap();
+    }
+
+    public Weapon getWeapon(Integer weaponId) throws InvalidAttributesException {
+        Optional<Weapon> optionalWeapon = weaponsRepository.findWeapon(weaponId);
+
+        return optionalWeapon.orElseThrow(() ->
+                new InvalidAttributesException("Requested weapon with id " + weaponId + " does not exists."));
+    }
+
     private String getWeaponName(Integer index) {
-        return weaponsManager.queryWeaponsMap(index);
+        return weaponsRepository.getWeaponName(index);
     }
 
     private String retrieveCommandModel(Integer weaponId, Integer actionId) throws InvalidAttributesException {
-        Optional<String> commandModel = actionsManager.queryActionsMap(weaponId, actionId);
+        Optional<String> commandModel = weaponsRepository.getActionModel(weaponId, actionId);
 
-        if (commandModel.isEmpty()) {
-            String errMsg = "Provided weaponId '" + weaponId + "' or actionId '" + actionId + "' are invalid.";
-            log.error(errMsg);
-            throw new InvalidAttributesException(errMsg);
-        }
+        if (commandModel.isPresent())
+            return commandModel.get();
 
-        return commandModel.get();
+        String errMsg = "Provided weaponId '" + weaponId + "' or actionId '" + actionId + "' are invalid.";
+        log.error(errMsg);
+        throw new InvalidAttributesException(errMsg);
     }
 
     private Process execute(String command, String outputPath) throws IOException {
