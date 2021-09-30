@@ -1,8 +1,9 @@
 package com.pi.back.config;
 
-import com.pi.back.cmd.ActionsManager;
-import com.pi.back.cmd.WeaponsManager;
 import com.pi.back.utils.FileSystem;
+import com.pi.back.weaponry.Action;
+import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,35 +27,53 @@ import java.util.stream.Stream;
 public class WeaponryInitializer {
 
     private final String ACTIONS_DIR = FileSystem.ACTIONS.getPath();
+    private final String WEAPONS_DIR = FileSystem.WEAPONS.getPath();
 
-    private final WeaponsManager weaponsManager;
-    private final ActionsManager actionsManager;
+    private final WeaponsRepository weaponsRepository;
 
     @Autowired
-    public WeaponryInitializer(WeaponsManager weaponsManager, ActionsManager actionsManager) {
-        this.weaponsManager = weaponsManager;
-        this.actionsManager = actionsManager;
+    public WeaponryInitializer(WeaponsRepository weaponsRepository) {
+        this.weaponsRepository = weaponsRepository;
     }
 
     @Bean
     public void initialize() {
         AtomicInteger index = new AtomicInteger();
 
-        try (Stream<Path> paths = Files.walk(Paths.get(ACTIONS_DIR))) {
-            paths
+        try (Stream<Path> weaponsPath = Files.walk(Paths.get(WEAPONS_DIR))) {
+            weaponsPath
                     .filter(Files::isRegularFile)
                     .forEach(file -> {
                         String filename = file.getFileName().toString();
                         int i = index.getAndIncrement();
-                        actionsManager.updateActionsMap(i, loadActionsFile(filename));
-                        weaponsManager.updateWeaponsMap(i, filename);
+                        weaponsRepository.insert(i, loadWeaponFile(filename));
                     });
         } catch (IOException e) {
             log.error("Error when trying to list files from '{}' directory", ACTIONS_DIR);
         }
     }
 
-    private Map<Integer, String> loadActionsFile(String fileName) {
+    private Weapon loadWeaponFile(String fileName) {
+        File file = new File(WEAPONS_DIR + "/" + fileName);
+        StringBuilder description = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            br.lines()
+                    .forEach(description::append);
+        } catch (Exception e) {
+            log.error("Error loading file '{}'", fileName);
+        }
+
+        Action actions = loadActionsFile(fileName);
+
+        return Weapon.builder()
+                .name(fileName)
+                .description(description.toString())
+                .actions(actions)
+                .build();
+    }
+
+    private Action loadActionsFile(String fileName) {
         File file = new File(ACTIONS_DIR + "/" + fileName);
         Map<Integer, String> actionsMap = new HashMap<>();
 
@@ -65,9 +84,9 @@ public class WeaponryInitializer {
                             Objects.requireNonNull(parts[1].trim())));
 
         } catch (Exception e) {
-            log.error("Error when trying to load file content '{}' into hash map", fileName);
+            log.error("Error loading file '{}'", fileName);
         }
 
-        return actionsMap;
+        return Action.builder().actionsMap(actionsMap).build();
     }
 }
