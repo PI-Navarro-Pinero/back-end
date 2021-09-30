@@ -1,6 +1,9 @@
 package com.pi.back.web;
 
 import com.pi.back.services.SystemService;
+import com.pi.back.weaponry.Weapon;
+import com.pi.back.web.weaponry.WeaponResponse;
+import com.pi.back.web.weaponry.WeaponsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static com.pi.back.config.security.Privileges.Roles.ROLE_X;
 
@@ -24,6 +29,38 @@ public class WeaponryController {
     @Autowired
     public WeaponryController(SystemService systemService) {
         this.systemService = systemService;
+    }
+
+    @Secured(ROLE_X)
+    @GetMapping("/weaponry")
+    public ResponseEntity<WeaponsResponse> fetchWeaponry() {
+        Map<Integer, Weapon> weaponMap = systemService.getAvailableWeapons();
+
+        final List<WeaponResponse> weaponsListResponse = weaponMap.entrySet().stream()
+                .map(entry -> WeaponResponse.newInstance(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+
+        if (weaponsListResponse.isEmpty())
+            return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(WeaponsResponse
+                .builder()
+                .weapons(weaponsListResponse)
+                .build());
+    }
+
+    @Secured(ROLE_X)
+    @GetMapping("/weaponry/{weaponId}/actions")
+    public ResponseEntity<WeaponResponse> fetchWeaponActions(@PathVariable(name = "weaponId") Integer weaponId) {
+        try {
+            Weapon weapon = systemService.getWeapon(weaponId);
+            return ResponseEntity.ok(WeaponResponse
+                    .newActionsInstance(weaponId, weapon));
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(WeaponResponse.newErrorInstance(e));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @Secured(ROLE_X)
