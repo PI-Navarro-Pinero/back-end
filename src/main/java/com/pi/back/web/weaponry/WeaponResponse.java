@@ -21,7 +21,8 @@ public class WeaponResponse {
     private Integer id;
     private String name;
     private String description;
-    private List<String> actions;
+//    private List<String> actions;
+    private Map<Integer, String> actions;
     private String error;
 
     public static WeaponResponse newInstance(Integer id, Weapon weapon) {
@@ -33,15 +34,10 @@ public class WeaponResponse {
     }
 
     public static WeaponResponse newActionsInstance(Integer id, Weapon weapon) {
-        List<String> actionsList = weapon.getActions().getActionsMap()
-                .entrySet().stream()
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
-
         return WeaponResponse.builder()
                 .id(id)
                 .name(weapon.getName())
-                .actions(actionsList)
+                .actions(weapon.getActions().getActionsMap())
                 .build();
     }
 
