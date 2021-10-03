@@ -7,7 +7,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -31,10 +34,13 @@ public class WeaponResponse {
     }
 
     public static WeaponResponse newActionsInstance(Integer id, Weapon weapon) {
+        AtomicInteger index = new AtomicInteger();
+
         return WeaponResponse.builder()
                 .id(id)
                 .name(weapon.getName())
-                .actions(weapon.getActions().getActionsMap())
+                .actions(weapon.getActions().stream()
+                        .collect(Collectors.toMap(i -> index.getAndIncrement(), s -> s)))
                 .build();
     }
 

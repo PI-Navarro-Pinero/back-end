@@ -9,9 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Weapon {
-    private String name;
-    private String description;
-    private String configurationFile;
-    private List<String> actions;
+public class Weaponry {
+    private List<Weapon> weaponry;
 }

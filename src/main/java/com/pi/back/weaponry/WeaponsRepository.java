@@ -1,24 +1,21 @@
 package com.pi.back.weaponry;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
-@Component
 @Data
+@Component
 public class WeaponsRepository {
 
-    private final Map<Integer, Weapon> weaponsMap;
+    private Weaponry weaponsList;
 
-    public WeaponsRepository() {
-        this.weaponsMap = new HashMap<>();
-    }
-
-    public void insert(Integer i, Object description) {
-        weaponsMap.put(i, (Weapon) description);
+    @Autowired
+    public WeaponsRepository(Weaponry weaponsList) {
+        this.weaponsList = weaponsList;
     }
 
     public String getWeaponName(Integer weaponId) {
@@ -28,16 +25,23 @@ public class WeaponsRepository {
     }
 
     public Optional<String> getActionModel(Integer weaponId, Integer actionId) {
-        return findAction(weaponId)
-                .map(Action::getActionsMap)
-                .map(actionsMap -> actionsMap.get(actionId));
+        try {
+            return findAction(weaponId)
+                    .map(actionsMap -> actionsMap.get(actionId));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public Optional<Weapon> findWeapon(Integer weaponId) {
-        return Optional.ofNullable(weaponsMap.get(weaponId));
+        try {
+            return Optional.ofNullable(weaponsList.getWeaponry().get(weaponId));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
-    private Optional<Action> findAction(Integer weaponId) {
+    private Optional<List<String>> findAction(Integer weaponId) {
         return findWeapon(weaponId)
                 .map(Weapon::getActions);
     }
