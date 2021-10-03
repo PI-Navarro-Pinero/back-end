@@ -17,6 +17,7 @@ import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.pi.back.config.security.Privileges.Roles.ROLE_X;
@@ -34,10 +35,11 @@ public class WeaponryController {
     @Secured(ROLE_X)
     @GetMapping("/weaponry")
     public ResponseEntity<WeaponsResponse> fetchWeaponry() {
-        Map<Integer, Weapon> weaponMap = systemService.getAvailableWeapons();
+        List<Weapon> weaponMap = systemService.getAvailableWeapons();
 
-        final List<WeaponResponse> weaponsListResponse = weaponMap.entrySet().stream()
-                .map(entry -> WeaponResponse.newInstance(entry.getKey(), entry.getValue()))
+        AtomicInteger index = new AtomicInteger();
+        final List<WeaponResponse> weaponsListResponse = weaponMap.stream()
+                .map(weapon -> WeaponResponse.newInstance(index.getAndIncrement(), weapon))
                 .collect(Collectors.toList());
 
         if (weaponsListResponse.isEmpty())

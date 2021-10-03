@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Component
 public class CommandManager {
 
-    Pattern COMMAND_MODEL_PATTERN = Pattern.compile("(\\[.*?\\])");
+    Pattern COMMAND_MODEL_PATTERN = Pattern.compile("[\\[\\{\\(].*?[\\]\\}\\)]");
 
     public boolean validateUserInput(String commandModel, List<String> queryParamsSize) {
         Matcher commandMatcher = COMMAND_MODEL_PATTERN.matcher(commandModel);
@@ -20,7 +20,7 @@ public class CommandManager {
         if (queryParamsSize != null)
             return commandMatcher.results().count() == queryParamsSize.size();
 
-        return false;
+        return true;
     }
 
     public String buildCommand(String commandModel, List<String> queryParamsList) {

@@ -18,18 +18,16 @@ import java.io.File;
 public class EnvironmentConfiguration {
 
     private String baseDir;
-    private String weaponryDir = "weaponry/";
-    private String actionsDir  = "actions/";
-    private String outputsDir  = "outputs/";
-    private String logsDir     = ".logs/";
+    private String outputsDir = "outputs/";
+    private String logsDir = ".logs/";
 
     @EventListener(ApplicationReadyEvent.class)
     public void makeDirectories() {
 
         File parent = new File(baseDir);
-        String[] children= {weaponryDir, actionsDir, outputsDir, logsDir};
+        String[] children = {outputsDir, logsDir};
 
-        if(!parent.canWrite()) {
+        if (!parent.canWrite()) {
             log.error("Can't write into {}. I don't have the right permissions", parent);
         }
 
@@ -40,9 +38,9 @@ public class EnvironmentConfiguration {
                 log.info("'{}' is the base directory.", parent);
         }
 
-        for(String child : children) {
+        for (String child : children) {
             File sub = new File(parent, child);
-            if(!sub.exists()) {
+            if (!sub.exists()) {
                 if (sub.mkdir())
                     log.info("Created '{}' directory", child);
                 else

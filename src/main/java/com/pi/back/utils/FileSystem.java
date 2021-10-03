@@ -11,16 +11,13 @@ import lombok.ToString;
 @ToString
 public enum FileSystem {
 
-    ACTIONS(Path.ACTIONS_DIR),
-    WEAPONS(Path.WEAPONS_DIR),
+    BASEDIR(Path.BASE_DIR),
     LOGS(Path.LOGS_DIR),
     OUTPUTS(Path.OUTPUTS_DIR);
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Path {
         public static String BASE_DIR = System.getenv("BASE_DIR");
-        public static String ACTIONS_DIR = BASE_DIR + "/actions";
-        public static String WEAPONS_DIR = BASE_DIR + "/weaponry";
         public static String OUTPUTS_DIR = BASE_DIR + "/outputs";
         public static String LOGS_DIR = BASE_DIR + "/.logs";
     }

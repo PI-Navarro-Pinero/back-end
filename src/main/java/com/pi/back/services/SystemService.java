@@ -54,8 +54,8 @@ public class SystemService {
         return true;
     }
 
-    public Map<Integer, Weapon> getAvailableWeapons() {
-        return weaponsRepository.getWeaponsMap();
+    public List<Weapon> getAvailableWeapons() {
+        return weaponsRepository.getWeaponsList().getWeaponry();
     }
 
     public Weapon getWeapon(Integer weaponId) throws InvalidAttributesException {
