@@ -12,15 +12,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: docker login
+    
+    - name: Login to DockerHub
       env:
         DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
         DOCKERHUB_PASSWD: ${{ secrets.DOCKERHUB_PASSWD }}
       run: |
         docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWD
-        
+
     - name: Build the Docker image
       run: docker build . --file Dockerfile-rpi --tag mistagreen/pinp:$GITHUB_SHA
       
-    - name: Docker Push
+    - name: Push the Docker image
       run: docker push mistagreen/pinp
