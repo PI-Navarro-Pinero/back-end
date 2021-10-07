@@ -2,7 +2,7 @@ name: Build and Push Dockerfile-rpi
 
 on:
   push: 
-    branches: [ master, issue-83-fix_image_publishing ]
+    branches: [ master ]
 
 jobs:
   build-and-push:
