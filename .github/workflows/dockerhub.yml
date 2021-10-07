@@ -5,7 +5,7 @@ on:
     branches: [ master, issue-83-fix_image_publishing ]
 
 jobs:
-  build-and-push:
+  login-to-dockerhub:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,9 +17,10 @@ jobs:
         DOCKERHUB_PASSWD: ${{ secrets.DOCKERHUB_PASSWD }}
       run: |
         docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWD
+    
+    - uses: aevea/action-kaniko@v0.6.0
 
-    - name: Build the Docker image
-      uses: aevea/action-kaniko@v0.6.0
+    - name: Build the Docker image  
       with:
         image: mistagreen/pinp
         username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -30,3 +31,8 @@ jobs:
       
     - name: Push the Docker image
       run: docker push mistagreen/pinp
+  # push-to-dockerhub:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+    
