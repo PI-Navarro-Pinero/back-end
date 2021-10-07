@@ -19,9 +19,9 @@ jobs:
         docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWD
 
     - name: Build the Docker image  
-    - uses: aevea/action-kaniko@v0.6.0
+      uses: aevea/action-kaniko@v0.6.0
       with:
-        contest: Dockerfile-rpi
+        context: Dockerfile-rpi
         image: mistagreen/pinp
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWD }}
