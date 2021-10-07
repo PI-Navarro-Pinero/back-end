@@ -9,17 +9,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Check Out Repo 
+        uses: actions/checkout@v2
 
-    - name: Login to DockerHub
-      env:
-        DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
-        DOCKERHUB_PASSWD: ${{ secrets.DOCKERHUB_PASSWD }}
-      run: |
-        docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWD
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_PASSWD }}
 
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile-rpi --tag mistagreen/pinp:$GITHUB_SHA
-      
-    - name: Push the Docker image
-      run: docker push mistagreen/pinp
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile-rpi
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/pinp:latest
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
