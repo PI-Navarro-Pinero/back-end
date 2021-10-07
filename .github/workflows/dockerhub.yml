@@ -18,7 +18,12 @@ jobs:
       run: |
         docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWD
 
-    - name: Build the Docker image  
+  build-and-push:
+    needs: login-to-dockerhub
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Build the Docker image
       uses: aevea/action-kaniko@v0.6.0
       with:
         context: Dockerfile-rpi
