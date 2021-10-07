@@ -29,7 +29,7 @@ jobs:
           context: ./
           file: ./Dockerfile-rpi
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/pinp:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/pinp:$GITHUB_SHA
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
