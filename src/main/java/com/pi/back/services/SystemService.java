@@ -2,7 +2,9 @@ package com.pi.back.services;
 
 import com.pi.back.utils.FileSystem;
 import com.pi.back.weaponry.CommandManager;
+import com.pi.back.weaponry.ProcessesManager;
 import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponProcess;
 import com.pi.back.weaponry.WeaponsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,35 +25,42 @@ public class SystemService {
     private final String OUTPUTS_DIR = FileSystem.OUTPUTS.getPath();
 
     private final CommandManager commandManager;
+    private final ProcessesManager processesManager;
     private final WeaponsRepository weaponsRepository;
 
     @Autowired
-    public SystemService(CommandManager commandManager, WeaponsRepository weaponsRepository) {
+    public SystemService(CommandManager commandManager,
+                         WeaponsRepository weaponsRepository,
+                         ProcessesManager processesManager) {
         this.commandManager = commandManager;
         this.weaponsRepository = weaponsRepository;
+        this.processesManager = processesManager;
     }
 
-    public boolean run(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, ExecutionException {
+    public WeaponProcess run(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, ExecutionException {
         String command = retrieveCommandModel(weaponId, actionId);
-        boolean inputIsValid = commandManager.validateUserInput(command, queryParamsList);
 
-        if (inputIsValid) {
+        try {
             command = commandManager.buildCommand(command, queryParamsList);
-        } else {
-            String errMsg = "Requested action cannot be executed with provided variables.";
+        } catch (Exception e) {
+            String errMsg = e.getMessage();
             log.error(errMsg);
             throw new InvalidAttributesException(errMsg);
         }
 
-        String outputPath = OUTPUTS_DIR + "/" + getWeaponName(weaponId) + "/" + actionId;
-
+        Weapon weapon = getWeapon(weaponId);
+        String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + actionId;
+        Process process;
         try {
-            Process process = execute(command, outputPath);
+            process = execute(command, outputPath);
         } catch (Exception e) {
             throw new ExecutionException("Command '" + command + "' execution failed.", e);
         }
 
-        return true;
+        WeaponProcess weaponProcess = WeaponProcess.newInstance(process, weapon);
+        processesManager.insert(weaponProcess);
+
+        return weaponProcess;
     }
 
     public List<Weapon> getAvailableWeapons() {
@@ -65,8 +74,17 @@ public class SystemService {
                 new InvalidAttributesException("Requested weapon with id " + weaponId + " does not exists."));
     }
 
-    private String getWeaponName(Integer index) {
-        return weaponsRepository.getWeaponName(index);
+    public Map<Long, WeaponProcess> getRunningActions() {
+        return processesManager.retrieveAll();
+    }
+
+    public void killRunningAction(Long pid) throws InvalidAttributesException {
+        try {
+            processesManager.terminate(pid);
+        } catch (InvalidAttributesException e) {
+            log.error(e.getMessage());
+            throw e;
+        }
     }
 
     private String retrieveCommandModel(Integer weaponId, Integer actionId) throws InvalidAttributesException {
