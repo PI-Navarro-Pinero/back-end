@@ -1,4 +1,4 @@
-# PINP backend ![workflow](https://github.com/PI-Navarro-Pinero/back-end/actions/workflows/build-app.yml/badge.svg) ![Coverage](.github/badges/jacoco.svg)
+# PINP backend ![workflow](https://github.com/PI-Navarro-Pinero/back-end/actions/workflows/ci.yml/badge.svg) ![Coverage](.github/badges/jacoco.svg)
 
 
 # Local environment
