@@ -1,11 +1,15 @@
-name: Build and Push Dockerfile-rpi
+name: Continuous Delivery
 
 on:
-  push: 
-    branches: [ master ]
+  pull_request: 
+    branches: 
+    - master
+    types:
+      - closed
 
 jobs:
-  build-and-push:
+  build-push-deploy:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -33,3 +37,9 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Invoke deployment hook
+        uses: distributhor/workflow-webhook@v2
+        env:
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
+          webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
