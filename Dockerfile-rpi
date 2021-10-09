@@ -1,9 +1,9 @@
-FROM maven:3.8.1-jdk-11-slim AS build
+FROM maven:3.8.1-adoptopenjdk-11 AS build
 COPY src /home/pinp/src
 COPY pom.xml /home/pinp
 RUN mvn -f /home/pinp/pom.xml clean package
 
-FROM openjdk:11-jre-slim
+FROM arm32v7/openjdk:11-jre-slim
 #RUN useradd -ms /bin/bash pinp
 #USER pinp
 WORKDIR /pinp
