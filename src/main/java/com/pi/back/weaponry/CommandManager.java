@@ -3,6 +3,7 @@ package com.pi.back.weaponry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -14,16 +15,12 @@ public class CommandManager {
 
     Pattern COMMAND_MODEL_PATTERN = Pattern.compile("[\\[\\{\\(].*?[\\]\\}\\)]");
 
-    public boolean validateUserInput(String commandModel, List<String> queryParamsSize) {
-        Matcher commandMatcher = COMMAND_MODEL_PATTERN.matcher(commandModel);
+    public String buildCommand(String commandModel, List<String> queryParamsList) throws InvalidAttributesException {
+        boolean isValid = validateUserInput(commandModel, queryParamsList);
 
-        if (queryParamsSize != null)
-            return commandMatcher.results().count() == queryParamsSize.size();
+        if (!isValid)
+            throw new InvalidAttributesException("Unsuitable parameters list.");
 
-        return true;
-    }
-
-    public String buildCommand(String commandModel, List<String> queryParamsList) {
         StringBuilder commandBuilder = new StringBuilder();
         Matcher commandMatcher = COMMAND_MODEL_PATTERN.matcher(commandModel);
 
@@ -34,5 +31,14 @@ public class CommandManager {
         commandMatcher.appendTail(commandBuilder);
 
         return commandBuilder.toString();
+    }
+
+    private boolean validateUserInput(String commandModel, List<String> queryParamsSize) {
+        Matcher commandMatcher = COMMAND_MODEL_PATTERN.matcher(commandModel);
+
+        if (queryParamsSize != null)
+            return commandMatcher.results().count() == queryParamsSize.size();
+
+        return true;
     }
 }

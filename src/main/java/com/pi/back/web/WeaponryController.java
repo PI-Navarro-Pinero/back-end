@@ -2,12 +2,16 @@ package com.pi.back.web;
 
 import com.pi.back.services.SystemService;
 import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponProcess;
+import com.pi.back.web.weaponry.ActionResponse;
+import com.pi.back.web.weaponry.ActionsResponse;
 import com.pi.back.web.weaponry.WeaponResponse;
 import com.pi.back.web.weaponry.WeaponsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +51,7 @@ public class WeaponryController {
 
         return ResponseEntity.ok(WeaponsResponse
                 .builder()
-                .weapons(weaponsListResponse)
+                .weaponry(weaponsListResponse)
                 .build());
     }
 
@@ -57,7 +61,7 @@ public class WeaponryController {
         try {
             Weapon weapon = systemService.getWeapon(weaponId);
             return ResponseEntity.ok(WeaponResponse
-                    .newActionsInstance(weaponId, weapon));
+                    .newInstance(weaponId, weapon));
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(WeaponResponse.newErrorInstance(e));
         } catch (Exception e) {
@@ -67,18 +71,45 @@ public class WeaponryController {
 
     @Secured(ROLE_X)
     @GetMapping("/weaponry/{weaponId}/actions/{actionId}")
-    public ResponseEntity<String> executeAction(@PathVariable(name = "weaponId") Integer weaponId,
-                                                @PathVariable(name = "actionId") Integer actionId,
-                                                @RequestParam(name = "parameters", required = false) List<String> parameters) {
+    public ResponseEntity<ActionResponse> executeAction(@PathVariable(name = "weaponId") Integer weaponId,
+                                                        @PathVariable(name = "actionId") Integer actionId,
+                                                        @RequestParam(name = "parameters", required = false) List<String> parameters) {
         try {
-            boolean executionResult = systemService.run(weaponId, actionId, parameters);
-            return ResponseEntity.ok().build();
+            WeaponProcess weaponProcess = systemService.run(weaponId, actionId, parameters);
+            return ResponseEntity.ok().body(ActionResponse.newInstance(weaponProcess));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(e.getExplanation());
+            return ResponseEntity.badRequest().body(ActionResponse.newErrorInstance(e));
         } catch (ExecutionException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ActionResponse.newErrorInstance(e));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_X)
+    @GetMapping("/weaponry/status")
+    public ResponseEntity<ActionsResponse> runningActions() {
+        try {
+            Map<Long, WeaponProcess> runningActions = systemService.getRunningActions();
+            List<ActionResponse> actionResponseList = runningActions.values().stream()
+                    .map(ActionResponse::newStatusInstance)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok().body(ActionsResponse.newInstance(actionResponseList));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_X)
+    @GetMapping("/weaponry/status/{pid}/terminate")
+    public ResponseEntity<String> killRunningAction(@PathVariable(name = "pid") Long pid) {
+        try {
+            systemService.killRunningAction(pid);
+            return ResponseEntity.ok().build();
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }
