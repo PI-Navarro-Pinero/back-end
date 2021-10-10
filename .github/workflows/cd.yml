@@ -34,6 +34,8 @@ jobs:
           file: ./Dockerfile-rpi
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/pinp:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USER }}/pinp:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USER }}/pinp:cache,mode=max
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
