@@ -2,7 +2,8 @@ package com.pi.back.services;
 
 import com.pi.back.utils.FileSystem;
 import com.pi.back.weaponry.CommandManager;
-import com.pi.back.weaponry.ProcessesManager;
+import com.pi.back.weaponry.RunningProcessesManager;
+import com.pi.back.weaponry.SystemManager;
 import com.pi.back.weaponry.Weapon;
 import com.pi.back.weaponry.WeaponProcess;
 import com.pi.back.weaponry.WeaponsRepository;
@@ -11,10 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -25,19 +30,22 @@ public class SystemService {
     private final String OUTPUTS_DIR = FileSystem.OUTPUTS.getPath();
 
     private final CommandManager commandManager;
-    private final ProcessesManager processesManager;
+    private final RunningProcessesManager runningProcessesManager;
     private final WeaponsRepository weaponsRepository;
+    private final SystemManager systemManager;
 
     @Autowired
     public SystemService(CommandManager commandManager,
                          WeaponsRepository weaponsRepository,
-                         ProcessesManager processesManager) {
+                         RunningProcessesManager processesManager,
+                         SystemManager systemManager) {
         this.commandManager = commandManager;
         this.weaponsRepository = weaponsRepository;
-        this.processesManager = processesManager;
+        this.runningProcessesManager = processesManager;
+        this.systemManager = systemManager;
     }
 
-    public WeaponProcess run(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, ExecutionException {
+    public WeaponProcess runAction(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, ExecutionException, IOException {
         String command = retrieveCommandModel(weaponId, actionId);
 
         try {
@@ -50,17 +58,56 @@ public class SystemService {
 
         Weapon weapon = getWeapon(weaponId);
         String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + actionId;
-        Process process;
+        Process process = null;
+        File outputFile;
         try {
-            process = execute(command, outputPath);
+            outputFile = systemManager.createDirectory(outputPath);
+            process = systemManager.execute(command, outputFile);
+            outputFile = systemManager.renameFile(outputFile, String.valueOf(process.pid()));
         } catch (Exception e) {
-            throw new ExecutionException("Command '" + command + "' execution failed.", e);
+            if (process != null)
+                process.destroy();
+            throw new IOException("Command '" + command + "' execution failed.");
         }
 
-        WeaponProcess weaponProcess = WeaponProcess.newInstance(process, weapon);
-        processesManager.insert(weaponProcess);
+        WeaponProcess weaponProcess = WeaponProcess.newInstance(process, weapon, outputFile);
+        runningProcessesManager.insert(weaponProcess);
 
         return weaponProcess;
+    }
+
+    public String runCommand(String command) throws IOException {
+        BufferedReader br;
+
+        try {
+            br = systemManager.execute(command);
+        } catch (Exception e) {
+            throw new IOException("Command '" + command + "' execution failed.");
+        }
+
+        StringBuilder file = new StringBuilder();
+        br.lines().forEach(file::append);
+
+        return file.toString();
+    }
+
+    public String getProcessPathname(Long pid) throws InvalidAttributesException {
+        File file = weaponsRepository.getWeaponsList()
+                .getWeaponry().stream()
+                .map(Weapon::getName)
+                .map(weaponName -> systemManager.findFile(FileSystem.OUTPUTS.getPath() + "/" + weaponName, pid.toString()))
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElseThrow(() -> new InvalidAttributesException("Provided pid " + pid + " is invalid."));
+
+        return file.getAbsolutePath();
+    }
+
+    public void inputToProcess(Long pid, String input) {
+        OutputStream outputStream = runningProcessesManager.retrieveAll().get(pid).getProcess().getOutputStream();
+        PrintWriter printWriter = new PrintWriter(outputStream);
+        printWriter.println(input);
+        printWriter.flush();
     }
 
     public List<Weapon> getAvailableWeapons() {
@@ -75,12 +122,12 @@ public class SystemService {
     }
 
     public Map<Long, WeaponProcess> getRunningActions() {
-        return processesManager.retrieveAll();
+        return runningProcessesManager.retrieveAll();
     }
 
     public void killRunningAction(Long pid) throws InvalidAttributesException {
         try {
-            processesManager.terminate(pid);
+            runningProcessesManager.terminate(pid);
         } catch (InvalidAttributesException e) {
             log.error(e.getMessage());
             throw e;
@@ -96,42 +143,5 @@ public class SystemService {
         String errMsg = "Provided weaponId '" + weaponId + "' or actionId '" + actionId + "' are invalid.";
         log.error(errMsg);
         throw new InvalidAttributesException(errMsg);
-    }
-
-    private Process execute(String command, String outputPath) throws IOException {
-        File outputFile;
-
-        try {
-            outputFile = createOutputDirectory(outputPath);
-        } catch (Exception e) {
-            log.error("Error creating output path file to '{}'", outputPath);
-
-            throw e;
-        }
-
-        List<String> splitCommand = List.of(command.split(" "));
-        ProcessBuilder procBuilder = new ProcessBuilder(splitCommand);
-        Process proc;
-        try {
-            proc = procBuilder.redirectOutput(outputFile).start();
-            log.info("Command '{}' executed successfully", command);
-        } catch (Exception e) {
-            log.error("Error executing command '{}'", command);
-            log.debug("Exception '{}' thrown when executing command '{}': '{}'", e.getClass(), command, e.getCause());
-
-            throw e;
-        }
-
-        return proc;
-    }
-
-    private File createOutputDirectory(String outputPath) {
-        File outputFile = new File(outputPath);
-        boolean directoryIsCreated = outputFile.getParentFile().mkdirs();
-
-        if (directoryIsCreated)
-            log.info("Directory '{}' has been created", outputPath);
-
-        return outputFile;
     }
 }

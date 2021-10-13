@@ -4,14 +4,16 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.io.File;
 import java.time.Instant;
 
 @Builder(access = AccessLevel.PRIVATE)
 @Getter
 public class WeaponProcess {
 
-    private Process process;
-    private Weapon weapon;
+    private final Process process;
+    private final Weapon weapon;
+    private final File outputFile;
 
     public boolean isAlive() {
         return process.isAlive();
@@ -32,14 +34,19 @@ public class WeaponProcess {
         return process.info().commandLine().orElse(null);
     }
 
-    public String command() {
-        return process.info().command().orElse(null);
+    public void terminateProcess() {
+        process.destroy();
     }
 
-    public static WeaponProcess newInstance(Process p, Weapon w) {
+    public String getPathname() {
+        return outputFile.getAbsolutePath();
+    }
+
+    public static WeaponProcess newInstance(Process p, Weapon w, File f) {
         return WeaponProcess.builder()
                 .process(p)
                 .weapon(w)
+                .outputFile(f)
                 .build();
     }
 }
