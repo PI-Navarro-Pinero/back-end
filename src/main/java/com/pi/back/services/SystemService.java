@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -85,10 +86,7 @@ public class SystemService {
             throw new IOException("Command '" + command + "' execution failed.");
         }
 
-        StringBuilder file = new StringBuilder();
-        br.lines().forEach(file::append);
-
-        return file.toString();
+        return br.lines().collect(Collectors.joining("\n"));
     }
 
     public String getProcessPathname(Long pid) throws InvalidAttributesException {
