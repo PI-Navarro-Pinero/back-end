@@ -11,23 +11,23 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class ProcessesManager {
+public class RunningProcessesManager {
 
-    private Map<Long, WeaponProcess> processesMap;
+    private Map<Long, WeaponProcess> runningProcessesMap;
 
-    public ProcessesManager() {
-        this.processesMap = new HashMap<>();
+    public RunningProcessesManager() {
+        this.runningProcessesMap = new HashMap<>();
     }
 
     public void insert(WeaponProcess newProcess) {
         if (newProcess != null && newProcess.isAlive())
-            processesMap.put(newProcess.pid(), newProcess);
+            runningProcessesMap.put(newProcess.pid(), newProcess);
     }
 
     public Map<Long, WeaponProcess> retrieveAll() {
         cleanDeadProcesses();
 
-        return processesMap;
+        return runningProcessesMap;
     }
 
     public void terminate(Long pid) throws InvalidAttributesException {
@@ -37,11 +37,21 @@ public class ProcessesManager {
         if (optionalWeaponProcess.isEmpty())
             throw new InvalidAttributesException("Provided pid is not valid.");
 
-        optionalWeaponProcess.get().getProcess().destroy();
+        optionalWeaponProcess.get().terminateProcess();
+    }
+
+    public String path(Long pid) throws InvalidAttributesException {
+        cleanDeadProcesses();
+
+        Optional<WeaponProcess> optionalWeaponProcess = retrieve(pid);
+        if (optionalWeaponProcess.isEmpty())
+            throw new InvalidAttributesException("Provided pid is not valid.");
+
+        return optionalWeaponProcess.get().getPathname();
     }
 
     private void cleanDeadProcesses() {
-        processesMap = processesMap.entrySet().stream()
+        runningProcessesMap = runningProcessesMap.entrySet().stream()
                 .filter(p -> p.getValue().isAlive())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
@@ -49,6 +59,6 @@ public class ProcessesManager {
     private Optional<WeaponProcess> retrieve(Long pid) {
         cleanDeadProcesses();
 
-        return Optional.ofNullable(processesMap.get(pid));
+        return Optional.ofNullable(runningProcessesMap.get(pid));
     }
 }

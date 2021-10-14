@@ -11,13 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -75,7 +75,7 @@ public class WeaponryController {
                                                         @PathVariable(name = "actionId") Integer actionId,
                                                         @RequestParam(name = "parameters", required = false) List<String> parameters) {
         try {
-            WeaponProcess weaponProcess = systemService.run(weaponId, actionId, parameters);
+            WeaponProcess weaponProcess = systemService.runAction(weaponId, actionId, parameters);
             return ResponseEntity.ok().body(ActionResponse.newInstance(weaponProcess));
         } catch (InvalidAttributesException e) {
             return ResponseEntity.badRequest().body(ActionResponse.newErrorInstance(e));
@@ -87,7 +87,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_X)
-    @GetMapping("/weaponry/status")
+    @GetMapping("/weaponry/running-actions")
     public ResponseEntity<ActionsResponse> runningActions() {
         try {
             Map<Long, WeaponProcess> runningActions = systemService.getRunningActions();
@@ -101,13 +101,43 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_X)
-    @GetMapping("/weaponry/status/{pid}/terminate")
+    @GetMapping("/weaponry/running-actions/{pid}/terminate")
     public ResponseEntity<String> killRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
             systemService.killRunningAction(pid);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @Secured(ROLE_X)
+    @GetMapping("/weaponry/running-actions/{pid}/output")
+    public ResponseEntity<String> actionOutput(@PathVariable(name = "pid") Long pid,
+                                               @RequestParam(name = "lines", required = false) Integer lines) {
+        try {
+            String pathname = systemService.getProcessPathname(pid);
+            String command = "tail" +
+                    (lines == null ? (" +0") : (" -" + lines))
+                    + " " + pathname;
+            String result = systemService.runCommand(command);
+            return ResponseEntity.ok().body(result);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @Secured(ROLE_X)
+    @GetMapping("/weaponry/running-actions/{pid}/input")
+    public ResponseEntity<String> actionInput(@PathVariable(name = "pid") Long pid,
+                                              @RequestParam(name = "input", required = false) String input) {
+        try {
+            systemService.inputToProcess(pid, input);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
