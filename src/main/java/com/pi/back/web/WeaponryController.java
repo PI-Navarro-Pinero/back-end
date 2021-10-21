@@ -11,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -70,6 +68,40 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_X)
+    @GetMapping("/weaponry/{weaponId}/configuration-file")
+    public ResponseEntity<String> getConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
+                                                       @RequestParam(value = "encode", required = false, defaultValue = "0") Boolean encode) {
+        try {
+            String pathname = systemService.getConfigurationFilePath(weaponId);
+            String command = "cat " + pathname;
+            String result = systemService.runCommand(command);
+            if (encode)
+                result = new String(Base64.getEncoder().encode(result.getBytes()));
+            return ResponseEntity.ok().body(result);
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_X)
+    @PutMapping("/weaponry/{weaponId}/configuration-file")
+    public ResponseEntity<String> setConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
+                                                       @RequestBody String configurationFile) {
+        try {
+            String pathname = systemService.getConfigurationFilePath(weaponId);
+            String command = "echo '" + configurationFile + "' > " + pathname;
+            systemService.runCommand(command);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_X)
     @GetMapping("/weaponry/{weaponId}/actions/{actionId}")
     public ResponseEntity<ActionResponse> executeAction(@PathVariable(name = "weaponId") Integer weaponId,
                                                         @PathVariable(name = "actionId") Integer actionId,
@@ -109,7 +141,7 @@ public class WeaponryController {
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -127,7 +159,7 @@ public class WeaponryController {
         } catch (IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -139,7 +171,7 @@ public class WeaponryController {
             systemService.inputToProcess(pid, input);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,14 @@ public class WeaponsRepository {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    public Optional<String> getConfigurationFilePath(Integer weaponId) throws InvalidAttributesException {
+        Optional<Weapon> optionalWeapon = findWeapon(weaponId);
+        if (optionalWeapon.isEmpty())
+            throw new InvalidAttributesException("Weapon " + weaponId + " do not exists");
+
+        return optionalWeapon.map(Weapon::getConfigurationFile);
     }
 
     private Optional<List<String>> findAction(Integer weaponId) {
