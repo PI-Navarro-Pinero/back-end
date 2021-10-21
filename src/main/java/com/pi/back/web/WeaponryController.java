@@ -93,8 +93,7 @@ public class WeaponryController {
                                                        @RequestBody String configurationFile) {
         try {
             String pathname = systemService.getConfigurationFilePath(weaponId);
-            String command = "echo '" + configurationFile + "' > " + pathname;
-            systemService.runCommand(command);
+            systemService.writeFile(pathname, configurationFile);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

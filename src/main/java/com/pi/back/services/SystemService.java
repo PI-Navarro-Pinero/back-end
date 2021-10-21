@@ -113,9 +113,13 @@ public class SystemService {
     public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {
         Optional<String> configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
 
-        if (configurationFilePath.isEmpty())
-            throw new IOException("Requested weapon " + weaponId + " does not require configuration file.");
+        if (configurationFilePath.isEmpty()) {
+            String msg = "Requested weapon " + weaponId + " does not require a configuration file.";
+            log.warn(msg);
+            throw new IOException(msg);
+        }
 
+        log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
         return configurationFilePath.get();
     }
 
@@ -128,6 +132,16 @@ public class SystemService {
             runningProcessesManager.terminate(pid);
         } catch (InvalidAttributesException e) {
             log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    public void writeFile(String filePath, String content) throws IOException {
+        try {
+            systemManager.writeFile(filePath, content);
+            log.info("File '{}' has been written with requested content {}.", filePath, content);
+        } catch (IOException e) {
+            log.error("File '{}' couldn't be written the requested content.", filePath);
             throw e;
         }
     }
