@@ -90,9 +90,12 @@ public class WeaponryController {
     @Secured(ROLE_X)
     @PutMapping("/weaponry/{weaponId}/configuration-file")
     public ResponseEntity<String> setConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
-                                                       @RequestBody String configurationFile) {
+                                                       @RequestBody String configurationFile,
+                                                       @RequestParam(required = false) boolean encoded) {
         try {
             String pathname = systemService.getConfigurationFilePath(weaponId);
+            if (encoded)
+                configurationFile = new String(Base64.getDecoder().decode(configurationFile.getBytes()));
             systemService.writeFile(pathname, configurationFile);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
