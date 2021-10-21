@@ -21,12 +21,10 @@ public class UserLoginService {
 
     public Optional<User> findByUsername(String username) {
         final Optional<User> user = this.usersRepository.findByUsername(username);
+        log.info("Authentication for user '{}' requested.", username);
 
-        if (user.isEmpty()) {
-            log.info("Authentication for '{}' failed. User not found.", username);
-        } else {
-            log.info("Authentication for user '{}' requested.", username);
-        }
+        if (user.isEmpty())
+            log.info("User '{}' not found.", username);
 
         return user;
     }
