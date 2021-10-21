@@ -1,22 +1,13 @@
 package com.pi.back.services;
 
 import com.pi.back.utils.FileSystem;
-import com.pi.back.weaponry.CommandManager;
-import com.pi.back.weaponry.RunningProcessesManager;
-import com.pi.back.weaponry.SystemManager;
-import com.pi.back.weaponry.Weapon;
-import com.pi.back.weaponry.WeaponProcess;
-import com.pi.back.weaponry.WeaponsRepository;
+import com.pi.back.weaponry.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -119,6 +110,19 @@ public class SystemService {
                 new InvalidAttributesException("Requested weapon with id " + weaponId + " does not exists."));
     }
 
+    public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {
+        Optional<String> configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
+
+        if (configurationFilePath.isEmpty()) {
+            String msg = "Requested weapon " + weaponId + " does not require a configuration file.";
+            log.warn(msg);
+            throw new IOException(msg);
+        }
+
+        log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
+        return configurationFilePath.get();
+    }
+
     public Map<Long, WeaponProcess> getRunningActions() {
         return runningProcessesManager.retrieveAll();
     }
@@ -128,6 +132,16 @@ public class SystemService {
             runningProcessesManager.terminate(pid);
         } catch (InvalidAttributesException e) {
             log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    public void writeFile(String filePath, String content) throws IOException {
+        try {
+            systemManager.writeFile(filePath, content);
+            log.info("File '{}' has been written with requested content {}.", filePath, content);
+        } catch (IOException e) {
+            log.error("File '{}' couldn't be written the requested content.", filePath);
             throw e;
         }
     }

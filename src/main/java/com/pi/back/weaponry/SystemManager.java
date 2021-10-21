@@ -3,12 +3,15 @@ package com.pi.back.weaponry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 
 @Slf4j
 @Component
@@ -87,5 +90,13 @@ public class SystemManager {
         }
 
         return null;
+    }
+
+    public void writeFile(String filePath, String content) throws IOException {
+        Path p = Paths.get(filePath);
+
+        try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(p, CREATE, TRUNCATE_EXISTING))) {
+            out.write(content.getBytes(), 0, content.length());
+        }
     }
 }
