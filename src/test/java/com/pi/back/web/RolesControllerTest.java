@@ -46,7 +46,7 @@ class RolesControllerTest {
         @Test
         @DisplayName("when roles are found then return 200 ok")
         void rolesFound() throws Exception {
-            List<Privileges> roleList = List.of(Privileges.ROLE_R);
+            List<Privileges> roleList = List.of(Privileges.ROLE_ADMIN);
 
             when(rolesService.findAll()).thenReturn(roleList);
 
@@ -78,7 +78,7 @@ class RolesControllerTest {
         @Test
         @DisplayName("when specific role is found then return 200 ok")
         void roleOneFound() throws Exception {
-            List<Privileges> roleList = List.of(Privileges.ROLE_R, Privileges.ROLE_W, Privileges.ROLE_X);
+            List<Privileges> roleList = List.of(Privileges.ROLE_ADMIN, Privileges.ROLE_AGENT);
 
             when(rolesService.findAll()).thenReturn(roleList);
 

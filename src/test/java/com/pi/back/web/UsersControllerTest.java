@@ -296,7 +296,7 @@ class UsersControllerTest {
                 .password("bar")
                 .fullname("baz")
                 .license("qux")
-                .roles(List.of(Privileges.ROLE_R))
+                .roles(List.of(Privileges.ROLE_ADMIN))
                 .build();
     }
 

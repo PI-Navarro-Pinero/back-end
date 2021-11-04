@@ -9,6 +9,6 @@ import java.util.List;
 public class RolesService {
 
     public List<Privileges> findAll() {
-        return List.of(Privileges.ROLE_R, Privileges.ROLE_W, Privileges.ROLE_X);
+        return List.of(Privileges.ROLE_ADMIN, Privileges.ROLE_AGENT);
     }
 }

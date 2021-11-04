@@ -18,7 +18,7 @@ class UserResponseTest {
                 .id(1)
                 .fullname("foo")
                 .license("bar")
-                .roles(List.of(Privileges.ROLE_R, Privileges.ROLE_X))
+                .roles(List.of(Privileges.ROLE_ADMIN, Privileges.ROLE_AGENT))
                 .password("baz")
                 .username("qux")
                 .build();
@@ -37,7 +37,7 @@ class UserResponseTest {
                 .id(1)
                 .fullname("foo")
                 .license("bar")
-                .roles(List.of(Privileges.ROLE_R, Privileges.ROLE_X))
+                .roles(List.of(Privileges.ROLE_ADMIN, Privileges.ROLE_AGENT))
                 .password("baz")
                 .username("qux")
                 .build();

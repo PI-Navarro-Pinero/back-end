@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-import static com.pi.back.config.security.Privileges.Roles.ROLE_R;
-import static com.pi.back.config.security.Privileges.Roles.ROLE_W;
+import static com.pi.back.config.security.Privileges.Roles.*;
 
 @RestController
 public class UsersController {
@@ -37,7 +36,7 @@ public class UsersController {
         this.usersService = usersService;
     }
 
-    @Secured(ROLE_R)
+    @Secured(ROLE_ADMIN)
     @GetMapping("/users")
     public ResponseEntity<UsersResponse> fetchUsers() {
         List<User> usersList = usersService.findAll();
@@ -54,7 +53,7 @@ public class UsersController {
                 .build());
     }
 
-    @Secured(ROLE_R)
+    @Secured(ROLE_ADMIN)
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserResponse> fetchUser(@PathVariable(name = "userId") Integer userId) {
         try {
@@ -68,7 +67,7 @@ public class UsersController {
         }
     }
 
-    @Secured(ROLE_W)
+    @Secured(ROLE_ADMIN)
     @PostMapping("/users")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         try {
@@ -81,7 +80,7 @@ public class UsersController {
         }
     }
 
-    @Secured(ROLE_W)
+    @Secured(ROLE_ADMIN)
     @PutMapping("/users/{userId}")
     public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest request,
                                                    @PathVariable(name = "userId") Integer userId) {
@@ -98,7 +97,7 @@ public class UsersController {
         }
     }
 
-    @Secured(ROLE_W)
+    @Secured(ROLE_ADMIN)
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<UserResponse> deleteUser(@PathVariable(name = "userId") Integer userId) {
         try {

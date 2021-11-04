@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.pi.back.config.security.Privileges.Roles.ROLE_R;
+import static com.pi.back.config.security.Privileges.Roles.ROLE_ADMIN;
 
 @RestController
 public class RolesController {
@@ -26,7 +26,7 @@ public class RolesController {
         this.rolesService = rolesService;
     }
 
-    @Secured(ROLE_R)
+    @Secured(ROLE_ADMIN)
     @GetMapping("/roles")
     public ResponseEntity<RolesResponse> fetchRoles() {
         List<Privileges> privilegesList = rolesService.findAll();
@@ -45,7 +45,7 @@ public class RolesController {
                 .build());
     }
 
-    @Secured(ROLE_R)
+    @Secured(ROLE_ADMIN)
     @GetMapping("/roles/{roleId}")
     public ResponseEntity<RoleResponse> fetchRole(@PathVariable(name = "roleId") Integer roleId) {
         List<Privileges> rolesList = rolesService.findAll();
