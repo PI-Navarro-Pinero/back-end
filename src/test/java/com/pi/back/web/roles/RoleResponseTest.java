@@ -15,15 +15,6 @@ class RoleResponseTest {
 
         assertThat(actual.getId()).isEqualTo(Privileges.ROLE_ADMIN.getRoleId());
         assertThat(actual.getRole()).isEqualTo(Privileges.ROLE_ADMIN.getRole());
-    }
-
-    @Test
-    @DisplayName("create detailed RoleResponse from Role")
-    void newDetailedInstanceTest() {
-        RoleResponse actual = RoleResponse.newDetailedInstance(Privileges.ROLE_ADMIN);
-
-        assertThat(actual.getId()).isEqualTo(Privileges.ROLE_ADMIN.getRoleId());
-        assertThat(actual.getRole()).isEqualTo(Privileges.ROLE_ADMIN.getRole());
         assertThat(actual.getDescription()).isEqualTo(Privileges.ROLE_ADMIN.getDescription());
     }
 }

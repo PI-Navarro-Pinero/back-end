@@ -54,7 +54,7 @@ public class RolesController {
                 .distinct()
                 .filter(r -> r.getRoleId().equals(roleId))
                 .findFirst()
-                .map(RoleResponse::newDetailedInstance)
+                .map(RoleResponse::newInstance)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

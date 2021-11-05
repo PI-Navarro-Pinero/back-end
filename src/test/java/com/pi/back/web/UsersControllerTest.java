@@ -262,7 +262,7 @@ class UsersControllerTest {
 
             mockMvc.perform(delete(USER_URI_PATH)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isNoContent());
         }
 
         @Test

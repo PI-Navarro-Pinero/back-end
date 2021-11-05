@@ -104,7 +104,7 @@ public class UsersController {
             usersService.delete(userId);
             return ResponseEntity.ok().build();
         } catch (NoSuchElementException noSuchElementException) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         } catch (InvalidParameterException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(UserResponse.newErrorInstance(e));
         } catch (Exception e) {

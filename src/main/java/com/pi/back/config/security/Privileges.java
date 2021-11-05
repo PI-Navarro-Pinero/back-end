@@ -10,8 +10,8 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum Privileges {
-    ROLE_ADMIN(1, Roles.ROLE_ADMIN, "Descripción del rol de administrador"),
-    ROLE_AGENT(2, Roles.ROLE_AGENT, "Descripción del rol de agente");
+    ROLE_ADMIN(1, Roles.ROLE_ADMIN, "Permite gestionar los usuarios de la aplicación y consultar roles disponibles."),
+    ROLE_AGENT(2, Roles.ROLE_AGENT, "Concede permisos para realizar acciones sobre un objetivo.");
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Roles {

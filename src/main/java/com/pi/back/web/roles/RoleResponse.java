@@ -15,17 +15,9 @@ public class RoleResponse {
 
     private Integer id;
     private String role;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String description;
 
     public static final RoleResponse newInstance(Privileges privilege) {
-        return RoleResponse.builder()
-                .id(privilege.getRoleId())
-                .role(privilege.getRole())
-                .build();
-    }
-
-    public static final RoleResponse newDetailedInstance(Privileges privilege) {
         return RoleResponse.builder()
                 .id(privilege.getRoleId())
                 .role(privilege.getRole())
