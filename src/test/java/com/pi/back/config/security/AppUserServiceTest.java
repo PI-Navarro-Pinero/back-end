@@ -33,7 +33,7 @@ class AppUserServiceTest {
             .id(1)
             .fullname("foo")
             .password("foobar")
-            .roles(List.of(Privileges.ROLE_R))
+            .roles(List.of(Privileges.ROLE_ADMIN))
             .username("bar")
             .license("baz")
             .build();

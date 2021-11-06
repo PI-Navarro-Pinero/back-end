@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.pi.back.config.security.Privileges.Roles.ROLE_X;
+import static com.pi.back.config.security.Privileges.Roles.ROLE_AGENT;
 
 @RestController
 public class WeaponryController {
@@ -34,7 +34,7 @@ public class WeaponryController {
         this.systemService = systemService;
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry")
     public ResponseEntity<WeaponsResponse> fetchWeaponry() {
         List<Weapon> weaponMap = systemService.getAvailableWeapons();
@@ -53,7 +53,7 @@ public class WeaponryController {
                 .build());
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/{weaponId}/actions")
     public ResponseEntity<WeaponResponse> fetchWeaponActions(@PathVariable(name = "weaponId") Integer weaponId) {
         try {
@@ -67,7 +67,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/{weaponId}/configuration-file")
     public ResponseEntity<String> getConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
                                                        @RequestParam(value = "encode", required = false, defaultValue = "0") Boolean encode) {
@@ -87,7 +87,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @PutMapping("/weaponry/{weaponId}/configuration-file")
     public ResponseEntity<String> setConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
                                                        @RequestBody String configurationFile,
@@ -103,7 +103,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/{weaponId}/actions/{actionId}")
     public ResponseEntity<ActionResponse> executeAction(@PathVariable(name = "weaponId") Integer weaponId,
                                                         @PathVariable(name = "actionId") Integer actionId,
@@ -120,7 +120,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/running-actions")
     public ResponseEntity<ActionsResponse> runningActions() {
         try {
@@ -134,7 +134,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/running-actions/{pid}/terminate")
     public ResponseEntity<String> killRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
@@ -147,7 +147,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/running-actions/{pid}/output")
     public ResponseEntity<String> actionOutput(@PathVariable(name = "pid") Long pid,
                                                @RequestParam(name = "lines", required = false) Integer lines) {
@@ -165,7 +165,7 @@ public class WeaponryController {
         }
     }
 
-    @Secured(ROLE_X)
+    @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/running-actions/{pid}/input")
     public ResponseEntity<String> actionInput(@PathVariable(name = "pid") Long pid,
                                               @RequestParam(name = "input", required = false) String input) {

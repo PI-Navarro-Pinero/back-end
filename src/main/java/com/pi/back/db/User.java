@@ -45,14 +45,11 @@ public class User {
     @Column(nullable = false, name = "LICENSE")
     private String license;
 
-    @Column(nullable = false, name = "ROLE_READ")
-    private boolean roleRead;
+    @Column(nullable = false, name = "ROLE_ADMIN")
+    private boolean roleAdmin;
 
-    @Column(nullable = false, name = "ROLE_WRITE")
-    private boolean roleWrite;
-
-    @Column(nullable = false, name = "ROLE_EXECUTE")
-    private boolean roleExecute;
+    @Column(nullable = false, name = "ROLE_AGENT")
+    private boolean roleAgent;
 
     @ElementCollection(targetClass = Privileges.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
@@ -61,9 +58,8 @@ public class User {
     public List<Privileges> getRoles() {
         List<Privileges> roles = new ArrayList<>();
 
-        if (roleRead) roles.add(Privileges.ROLE_R);
-        if (roleWrite) roles.add(Privileges.ROLE_W);
-        if (roleExecute) roles.add(Privileges.ROLE_X);
+        if (roleAdmin) roles.add(Privileges.ROLE_ADMIN);
+        if (roleAgent) roles.add(Privileges.ROLE_AGENT);
 
         return roles;
     }
@@ -71,9 +67,8 @@ public class User {
     public static class UserBuilder {
         public UserBuilder roles(List<Privileges> roles) {
             for (Privileges role : roles) {
-                if (role.equals(Privileges.ROLE_R)) roleRead = true;
-                else if (role.equals(Privileges.ROLE_W)) roleWrite = true;
-                else if (role.equals(Privileges.ROLE_X)) roleExecute = true;
+                if (role.equals(Privileges.ROLE_ADMIN)) roleAdmin = true;
+                else if (role.equals(Privileges.ROLE_AGENT)) roleAgent = true;
             }
 
             return this;

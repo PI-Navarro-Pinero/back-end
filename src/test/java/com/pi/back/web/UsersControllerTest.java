@@ -262,7 +262,7 @@ class UsersControllerTest {
 
             mockMvc.perform(delete(USER_URI_PATH)
                     .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isNoContent());
         }
 
         @Test
@@ -296,7 +296,7 @@ class UsersControllerTest {
                 .password("bar")
                 .fullname("baz")
                 .license("qux")
-                .roles(List.of(Privileges.ROLE_R))
+                .roles(List.of(Privileges.ROLE_ADMIN))
                 .build();
     }
 

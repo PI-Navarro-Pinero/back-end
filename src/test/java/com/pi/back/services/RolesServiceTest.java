@@ -18,7 +18,7 @@ class RolesServiceTest {
 
     @Test
     void findAllTest() {
-        List<Privileges> privilegesList = List.of(Privileges.ROLE_R, Privileges.ROLE_W, Privileges.ROLE_X);
+        List<Privileges> privilegesList = List.of(Privileges.ROLE_ADMIN, Privileges.ROLE_AGENT);
 
         assertThat(sut.findAll()).isEqualTo(privilegesList);
     }

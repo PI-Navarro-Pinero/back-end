@@ -23,9 +23,7 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UsersServiceTest {
@@ -49,7 +47,7 @@ class UsersServiceTest {
                     .username("foo")
                     .fullname("bar")
                     .password("baz")
-                    .roles(List.of(Privileges.ROLE_R))
+                    .roles(List.of(Privileges.ROLE_ADMIN))
                     .license("foobar")
                     .build();
 
@@ -73,7 +71,7 @@ class UsersServiceTest {
                     .username("foo")
                     .fullname("bar")
                     .password("baz")
-                    .roles(List.of(Privileges.ROLE_R))
+                    .roles(List.of(Privileges.ROLE_ADMIN))
                     .license("foobar")
                     .build();
 
@@ -104,7 +102,7 @@ class UsersServiceTest {
                     .username("foo")
                     .fullname("bar")
                     .license("foobar")
-                    .privileges(List.of(Privileges.ROLE_W))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             User mockUser = User.builder()
@@ -132,7 +130,7 @@ class UsersServiceTest {
                     .username("foo 0")
                     .fullname("bar")
                     .license("foobar")
-                    .privileges(List.of(Privileges.ROLE_W))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             List<User> users = createUsers();
@@ -151,7 +149,7 @@ class UsersServiceTest {
                     .username("foo")
                     .fullname("bar")
                     .license("foobar 0")
-                    .privileges(List.of(Privileges.ROLE_W))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             List<User> users = createUsers();
@@ -176,7 +174,7 @@ class UsersServiceTest {
                     .username("foo")
                     .fullname("bar")
                     .license("foobar")
-                    .privileges(List.of(Privileges.ROLE_W))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             assertThrows(InvalidParameterException.class, () -> sut.update(mockUserRequest));
@@ -190,7 +188,7 @@ class UsersServiceTest {
                     .username("foo")
                     .fullname("bar")
                     .license("foobar")
-                    .privileges(List.of(Privileges.ROLE_W))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             assertThrows(InvalidParameterException.class, () -> sut.update(mockUserRequest));
@@ -204,7 +202,7 @@ class UsersServiceTest {
                     .username("foo 2")
                     .fullname("bar 1")
                     .license("foobar 1")
-                    .privileges(List.of(Privileges.ROLE_R))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             when(usersRepository.findAll()).thenReturn(createUsers());
@@ -220,7 +218,7 @@ class UsersServiceTest {
                     .username("foo 1")
                     .fullname("bar 1")
                     .license("foobar 2")
-                    .privileges(List.of(Privileges.ROLE_R))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             when(usersRepository.findAll()).thenReturn(createUsers());
@@ -236,7 +234,7 @@ class UsersServiceTest {
                     .username("foo 10")
                     .fullname("bar 10")
                     .license("foobar 10")
-                    .privileges(List.of(Privileges.ROLE_R))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             when(usersRepository.findAll()).thenReturn(createUsers());
@@ -252,7 +250,7 @@ class UsersServiceTest {
                     .username("new foo 1")
                     .fullname("bar 1")
                     .license("foobar 1")
-                    .privileges(List.of(Privileges.ROLE_R))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             User mockUserToUpdate = User.builder()
@@ -280,7 +278,7 @@ class UsersServiceTest {
                     .username("foo 1")
                     .fullname("bar 1")
                     .license("new foobar 1")
-                    .privileges(List.of(Privileges.ROLE_R))
+                    .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
             User mockUserToUpdate = User.builder()
@@ -347,7 +345,7 @@ class UsersServiceTest {
                     .username("foo " + i)
                     .fullname("bar " + i)
                     .password("baz " + i)
-                    .roles(List.of(Privileges.ROLE_R))
+                    .roles(List.of(Privileges.ROLE_ADMIN))
                     .license("foobar " + i)
                     .build());
         }

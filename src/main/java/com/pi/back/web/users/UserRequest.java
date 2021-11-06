@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -24,15 +25,15 @@ public class UserRequest {
 
     private Integer id;
 
-    @NotEmpty(message = "username must be provided")
+    @NotBlank(message = "username must be provided")
     @Size(max = USERNAME_MAX_LENGHT)
     private String username;
 
-    @NotEmpty(message = "name must be provided")
+    @NotBlank(message = "name must be provided")
     @Size(max = FULLNAME_MAX_LENGHT)
     private String fullname;
 
-    @NotEmpty(message = "license must be provided")
+    @NotBlank(message = "license must be provided")
     @Size(max = LICENSE_MAX_LENGHT)
     private String license;
 
