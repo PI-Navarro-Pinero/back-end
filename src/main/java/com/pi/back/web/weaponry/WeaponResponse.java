@@ -21,6 +21,7 @@ public class WeaponResponse {
 
     private Integer id;
     private String name;
+    private boolean configurationFile;
     private String description;
     private Map<Integer, String> actions;
     private String error;
@@ -31,6 +32,7 @@ public class WeaponResponse {
         return WeaponResponse.builder()
                 .id(id)
                 .name(weapon.getName())
+                .configurationFile(!weapon.getConfigurationFile().isBlank())
                 .description(weapon.getDescription())
                 .actions(weapon.getActions().stream()
                         .collect(Collectors.toMap(i -> index.getAndIncrement(), s -> s)))

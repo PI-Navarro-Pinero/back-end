@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,13 +50,14 @@ public class SystemService {
         }
 
         Weapon weapon = getWeapon(weaponId);
-        String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + actionId;
+        String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + LocalDateTime.now() + "/" + actionId;
         Process process = null;
         File outputFile;
         try {
             outputFile = systemManager.createDirectory(outputPath);
             process = systemManager.execute(command, outputFile);
             outputFile = systemManager.renameFile(outputFile, String.valueOf(process.pid()));
+            outputFile = systemManager.renameFile(outputFile.getParentFile(), String.valueOf(process.pid()));
         } catch (Exception e) {
             if (process != null)
                 process.destroy();
@@ -84,7 +86,7 @@ public class SystemService {
         File file = weaponsRepository.getWeaponsList()
                 .getWeaponry().stream()
                 .map(Weapon::getName)
-                .map(weaponName -> systemManager.findFile(FileSystem.OUTPUTS.getPath() + "/" + weaponName, pid.toString()))
+                .map(weaponName -> systemManager.findFile(FileSystem.OUTPUTS.getPath() + "/" + weaponName + "/" + pid.toString(), pid.toString()))
                 .filter(Objects::nonNull)
                 .findAny()
                 .orElseThrow(() -> new InvalidAttributesException("Provided pid " + pid + " is invalid."));

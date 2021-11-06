@@ -22,6 +22,7 @@ public class SystemManager {
         ProcessBuilder procBuilder = new ProcessBuilder(splitCommand);
         procBuilder.redirectOutput(outputFile);
         procBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        procBuilder.directory(outputFile.getParentFile());
 
         return start(procBuilder);
     }
@@ -41,7 +42,7 @@ public class SystemManager {
             log.info("Command '{}' executed successfully", command);
             return process;
         } catch (Exception e) {
-            log.error("Error executing command '{}'", command);
+            log.error("Error executing command '{}': {}", command, e.getMessage());
             log.debug("Exception '{}' thrown when executing command '{}': '{}'", e.getClass(), command, e.getCause());
             throw e;
         }
