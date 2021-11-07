@@ -8,10 +8,10 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.io.*;
+import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -23,18 +23,18 @@ public class SystemService {
     private final String OUTPUTS_DIR = FileSystem.OUTPUTS.getPath();
 
     private final CommandManager commandManager;
-    private final RunningProcessesManager runningProcessesManager;
+    private final ProcessesManager processesManager;
     private final WeaponsRepository weaponsRepository;
     private final SystemManager systemManager;
 
     @Autowired
     public SystemService(CommandManager commandManager,
                          WeaponsRepository weaponsRepository,
-                         RunningProcessesManager processesManager,
+                         ProcessesManager processesManager,
                          SystemManager systemManager) {
         this.commandManager = commandManager;
         this.weaponsRepository = weaponsRepository;
-        this.runningProcessesManager = processesManager;
+        this.processesManager = processesManager;
         this.systemManager = systemManager;
     }
 
@@ -57,15 +57,14 @@ public class SystemService {
             outputFile = systemManager.createDirectory(outputPath);
             process = systemManager.execute(command, outputFile);
             outputFile = systemManager.renameFile(outputFile, String.valueOf(process.pid()));
-            outputFile = systemManager.renameFile(outputFile.getParentFile(), String.valueOf(process.pid()));
         } catch (Exception e) {
             if (process != null)
                 process.destroy();
             throw new IOException("Command '" + command + "' execution failed.");
         }
 
-        WeaponProcess weaponProcess = WeaponProcess.newInstance(process, weapon, outputFile);
-        runningProcessesManager.insert(weaponProcess);
+        WeaponProcess weaponProcess = new WeaponProcess(process, weapon, outputFile);
+        processesManager.insert(weaponProcess);
 
         return weaponProcess;
     }
@@ -83,19 +82,29 @@ public class SystemService {
     }
 
     public String getProcessPathname(Long pid) throws InvalidAttributesException {
-        File file = weaponsRepository.getWeaponsList()
-                .getWeaponry().stream()
-                .map(Weapon::getName)
-                .map(weaponName -> systemManager.findFile(FileSystem.OUTPUTS.getPath() + "/" + weaponName + "/" + pid.toString(), pid.toString()))
-                .filter(Objects::nonNull)
-                .findAny()
-                .orElseThrow(() -> new InvalidAttributesException("Provided pid " + pid + " is invalid."));
-
-        return file.getAbsolutePath();
+        try {
+            String path = processesManager.getProcessPath(pid);
+            log.info("Path of process {} is '{}'", pid, path);
+            return path;
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
+        }
     }
 
-    public void inputToProcess(Long pid, String input) {
-        OutputStream outputStream = runningProcessesManager.retrieveAll().get(pid).getProcess().getOutputStream();
+    public String getProcessDirectoryPathname(Long pid) throws InvalidAttributesException {
+        try {
+            String path = processesManager.getProcessDirectoryPath(pid);
+            log.info("Directory path of process {} is '{}'", pid, path);
+            return path;
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
+        }
+    }
+
+    public void inputToProcess(Long pid, String input) throws InvalidAttributesException {
+        OutputStream outputStream = processesManager.getRunningProcess(pid).getOutputStream();
         PrintWriter printWriter = new PrintWriter(outputStream);
         printWriter.println(input);
         printWriter.flush();
@@ -126,12 +135,16 @@ public class SystemService {
     }
 
     public Map<Long, WeaponProcess> getRunningActions() {
-        return runningProcessesManager.retrieveAll();
+        return processesManager.getAllRunningProcesses();
+    }
+
+    public Map<Long, WeaponProcess> getFinalizedActions() {
+        return processesManager.getAllTerminatedProcesses();
     }
 
     public void killRunningAction(Long pid) throws InvalidAttributesException {
         try {
-            runningProcessesManager.terminate(pid);
+            processesManager.terminate(pid);
         } catch (InvalidAttributesException e) {
             log.error(e.getMessage());
             throw e;
@@ -144,6 +157,20 @@ public class SystemService {
             log.info("File '{}' has been written with requested content {}.", filePath, content);
         } catch (IOException e) {
             log.error("File '{}' couldn't be written the requested content.", filePath);
+            throw e;
+        }
+    }
+
+    public String readFile(String filePath) throws InvalidAttributesException {
+        try {
+            return systemManager.readFile(filePath);
+        } catch (IOException e) {
+            String errMsg = "Invalid file name";
+            log.info(errMsg);
+            throw new InvalidAttributesException(errMsg);
+        } catch (InvalidPathException e) {
+            String errMsg = "Provided path '" + filePath + "' could not be processed: " + e;
+            log.error(errMsg);
             throw e;
         }
     }

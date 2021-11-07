@@ -7,8 +7,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -21,7 +22,7 @@ public class SystemManager {
         List<String> splitCommand = List.of(command.split(" "));
         ProcessBuilder procBuilder = new ProcessBuilder(splitCommand);
         procBuilder.redirectOutput(outputFile);
-        procBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+        procBuilder.redirectError(outputFile);
         procBuilder.directory(outputFile.getParentFile());
 
         return start(procBuilder);
@@ -71,7 +72,9 @@ public class SystemManager {
         boolean renameSucceeded = fileToRename.renameTo(newFile);
 
         if (!renameSucceeded) {
-            String errMsg = "Output file couldn't be renamed";
+            String errMsg = " Output file couldn't be renamed from '"
+                    + fileToRename.getAbsolutePath() + "' to '"
+                    + name + "' ";
             log.error(errMsg);
             throw new IOException(errMsg);
         }
@@ -79,25 +82,18 @@ public class SystemManager {
         return newFile;
     }
 
-    public File findFile(String parentFilename, String fileName) {
-        File file = new File(parentFilename);
-
-        File[] filesList = file.listFiles((dir1, name) -> name.startsWith(fileName));
-
-        if (filesList != null && filesList.length > 0) {
-            return Arrays.stream(filesList)
-                    .findFirst()
-                    .get();
-        }
-
-        return null;
-    }
-
     public void writeFile(String filePath, String content) throws IOException {
         Path p = Paths.get(filePath);
 
         try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(p, CREATE, TRUNCATE_EXISTING))) {
             out.write(content.getBytes(), 0, content.length());
+        }
+    }
+
+    public String readFile(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        try (Stream<String> lines = Files.lines(path)) {
+            return lines.collect(Collectors.joining("\n"));
         }
     }
 }

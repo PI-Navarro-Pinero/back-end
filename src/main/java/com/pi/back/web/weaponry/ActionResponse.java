@@ -31,8 +31,8 @@ public class ActionResponse {
         return ActionResponse.builder()
                 .pid(weaponProcess.pid())
                 .weapon(weaponProcess.getWeapon().getName())
-                .executionDate(weaponProcess.creationTime())
-                .commandLine(weaponProcess.commandLine())
+                .executionDate(weaponProcess.getCreationTime())
+                .commandLine(weaponProcess.getCommandLine())
                 .build();
     }
 
