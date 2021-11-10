@@ -1,6 +1,6 @@
 package com.pi.back.web.weaponry;
 
-import lombok.AccessLevel;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,15 +9,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Data
-@Builder(access = AccessLevel.PRIVATE)
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActionsResponse {
     private List<ActionResponse> runningActions;
-
-    public static ActionsResponse newInstance(List<ActionResponse> actionResponseList) {
-        return ActionsResponse.builder()
-                .runningActions(actionResponseList)
-                .build();
-    }
+    private List<ActionResponse> finalizedActions;
 }

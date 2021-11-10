@@ -17,7 +17,6 @@ import javax.naming.directory.InvalidAttributesException;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -121,21 +120,106 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/weaponry/running-actions")
-    public ResponseEntity<ActionsResponse> runningActions() {
+    @GetMapping("/actions")
+    public ResponseEntity<ActionsResponse> allActions() {
         try {
-            Map<Long, WeaponProcess> runningActions = systemService.getRunningActions();
-            List<ActionResponse> actionResponseList = runningActions.values().stream()
+            List<ActionResponse> finalizedActionResponseList = systemService.getFinalizedActions()
+                    .values().stream()
                     .map(ActionResponse::newStatusInstance)
                     .collect(Collectors.toList());
-            return ResponseEntity.ok().body(ActionsResponse.newInstance(actionResponseList));
+
+            List<ActionResponse> runningActionResponseList = systemService.getRunningActions()
+                    .values().stream()
+                    .map(ActionResponse::newStatusInstance)
+                    .collect(Collectors.toList());
+
+            ActionsResponse response = ActionsResponse.builder()
+                    .finalizedActions(finalizedActionResponseList)
+                    .runningActions(runningActionResponseList)
+                    .build();
+
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/weaponry/running-actions/{pid}/terminate")
+    @GetMapping("/actions/{pid}/stdout")
+    public ResponseEntity<String> actionStdout(@PathVariable(name = "pid") Long pid,
+                                               @RequestParam(name = "lines", required = false) Integer lines) {
+        try {
+            String pathname = systemService.getProcessPathname(pid);
+            String command = "tail" +
+                    (lines == null ? (" +0") : (" -" + lines))
+                    + " " + pathname;
+            String result = systemService.runCommand(command);
+            return ResponseEntity.ok().body(result);
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_AGENT)
+    @GetMapping("/actions/{pid}/files")
+    public ResponseEntity<String> actionOutput(@PathVariable(name = "pid") Long pid) {
+        try {
+            String command = "ls -I " + pid + " " + systemService.getProcessDirectoryPathname(pid);
+            String result = systemService.runCommand(command);
+
+            if (result.isBlank())
+                return ResponseEntity.noContent().build();
+
+            return ResponseEntity.ok().body(result);
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_AGENT)
+    @GetMapping("/actions/{pid}/files/{fileName}")
+    public ResponseEntity<String> readActionOutputFile(@PathVariable(name = "pid") Long pid,
+                                                       @PathVariable(name = "fileName") String fileName) {
+        try {
+            String pathname = systemService.getProcessDirectoryPathname(pid) + "/" + fileName;
+            String result = systemService.readFile(pathname);
+            return ResponseEntity.ok().body(result);
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_AGENT)
+    @GetMapping("/actions/active")
+    public ResponseEntity<ActionsResponse> runningActions() {
+        try {
+            List<ActionResponse> actionResponseList = systemService.getRunningActions()
+                    .values().stream()
+                    .map(ActionResponse::newStatusInstance)
+                    .collect(Collectors.toList());
+
+            ActionsResponse response = ActionsResponse.builder()
+                    .runningActions(actionResponseList)
+                    .build();
+
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Secured(ROLE_AGENT)
+    @GetMapping("/actions/active/{pid}/terminate")
     public ResponseEntity<String> killRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
             systemService.killRunningAction(pid);
@@ -148,30 +232,14 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/weaponry/running-actions/{pid}/output")
-    public ResponseEntity<String> actionOutput(@PathVariable(name = "pid") Long pid,
-                                               @RequestParam(name = "lines", required = false) Integer lines) {
-        try {
-            String pathname = systemService.getProcessPathname(pid);
-            String command = "tail" +
-                    (lines == null ? (" +0") : (" -" + lines))
-                    + " " + pathname;
-            String result = systemService.runCommand(command);
-            return ResponseEntity.ok().body(result);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-    @Secured(ROLE_AGENT)
-    @GetMapping("/weaponry/running-actions/{pid}/input")
+    @GetMapping("/actions/active/{pid}/input")
     public ResponseEntity<String> actionInput(@PathVariable(name = "pid") Long pid,
                                               @RequestParam(name = "input", required = false) String input) {
         try {
             systemService.inputToProcess(pid, input);
             return ResponseEntity.ok().build();
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
