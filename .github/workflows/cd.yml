@@ -19,6 +19,7 @@ jobs:
         uses: aevea/action-kaniko@master
         with:
           image: ${{ secrets.DOCKERHUB_USER }}/pinp
+          build_file: ./Dockerfile-rpi
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASSWD }}
           cache: true
