@@ -16,14 +16,14 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Build and push image
-        uses: aevea/action-kaniko@master
+        uses: aevea/action-kaniko@v0.6.1
         with:
-          build_file: Dockerfile-rpi
           image: ${{ secrets.DOCKERHUB_USER }}/pinp
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PASSWD }}
           cache: true
           cache_registry: ${{ secrets.DOCKERHUB_USER }}/cache
+          build_file: Dockerfile-rpi
 
       - name: Invoke deployment hook
         uses: distributhor/workflow-webhook@v2
