@@ -23,8 +23,6 @@ public class UserRequest {
     private static final int LICENSE_MAX_LENGHT = 45;
     private static final int EMAIL_MAX_LENGHT = 65;
 
-    private Integer id;
-
     @NotBlank(message = "username must be provided")
     @Size(max = USERNAME_MAX_LENGHT)
     private String username;

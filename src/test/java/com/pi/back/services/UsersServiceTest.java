@@ -3,6 +3,7 @@ package com.pi.back.services;
 import com.pi.back.config.security.Privileges;
 import com.pi.back.db.User;
 import com.pi.back.db.UsersRepository;
+import com.pi.back.web.users.UserDTO;
 import com.pi.back.web.users.UserRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -169,7 +170,7 @@ class UsersServiceTest {
         @Test
         @DisplayName("when user to update has id 0 then throw InvalidParameterException")
         void updateUserWithIdZero() {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO dto = UserDTO.builder()
                     .id(0)
                     .username("foo")
                     .fullname("bar")
@@ -177,13 +178,13 @@ class UsersServiceTest {
                     .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
-            assertThrows(InvalidParameterException.class, () -> sut.update(mockUserRequest));
+            assertThrows(InvalidParameterException.class, () -> sut.update(dto));
         }
 
         @Test
         @DisplayName("when user to update has id null then throw InvalidParameterException")
         void updateUserWithIdNull() {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO dto = UserDTO.builder()
                     .id(null)
                     .username("foo")
                     .fullname("bar")
@@ -191,13 +192,13 @@ class UsersServiceTest {
                     .privileges(List.of(Privileges.ROLE_ADMIN))
                     .build();
 
-            assertThrows(InvalidParameterException.class, () -> sut.update(mockUserRequest));
+            assertThrows(InvalidParameterException.class, () -> sut.update(dto));
         }
 
         @Test
         @DisplayName("when username condition is met then throw InvalidAttributesException")
         void updateUserUsingExistingUsername() {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO dto = UserDTO.builder()
                     .id(1)
                     .username("foo 2")
                     .fullname("bar 1")
@@ -207,13 +208,13 @@ class UsersServiceTest {
 
             when(usersRepository.findAll()).thenReturn(createUsers());
 
-            assertThrows(InvalidAttributesException.class, () -> sut.update(mockUserRequest));
+            assertThrows(InvalidAttributesException.class, () -> sut.update(dto));
         }
 
         @Test
         @DisplayName("when license condition is met then throw InvalidAttributesException")
         void updateUserUsingExistingLicense() {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO dto = UserDTO.builder()
                     .id(1)
                     .username("foo 1")
                     .fullname("bar 1")
@@ -223,13 +224,13 @@ class UsersServiceTest {
 
             when(usersRepository.findAll()).thenReturn(createUsers());
 
-            assertThrows(InvalidAttributesException.class, () -> sut.update(mockUserRequest));
+            assertThrows(InvalidAttributesException.class, () -> sut.update(dto));
         }
 
         @Test
         @DisplayName("when user to update is non existent then throw ClassNotFoundException")
         void updateNonExistentUser() {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO dto = UserDTO.builder()
                     .id(10)
                     .username("foo 10")
                     .fullname("bar 10")
@@ -239,13 +240,13 @@ class UsersServiceTest {
 
             when(usersRepository.findAll()).thenReturn(createUsers());
 
-            assertThrows(ClassNotFoundException.class, () -> sut.update(mockUserRequest));
+            assertThrows(ClassNotFoundException.class, () -> sut.update(dto));
         }
 
         @Test
         @DisplayName("when username conditions are met and user exists then update user")
         void updateUserUsername() throws Exception {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO userDTO = UserDTO.builder()
                     .id(1)
                     .username("new foo 1")
                     .fullname("bar 1")
@@ -254,18 +255,18 @@ class UsersServiceTest {
                     .build();
 
             User mockUserToUpdate = User.builder()
-                    .id(mockUserRequest.getId())
-                    .username(mockUserRequest.getUsername())
-                    .password("_" + mockUserRequest.getUsername())
-                    .fullname(mockUserRequest.getFullname())
-                    .roles(mockUserRequest.getPrivileges())
-                    .license(mockUserRequest.getLicense())
+                    .id(userDTO.getId())
+                    .username(userDTO.getUsername())
+                    .password("_" + userDTO.getUsername())
+                    .fullname(userDTO.getFullname())
+                    .roles(userDTO.getPrivileges())
+                    .license(userDTO.getLicense())
                     .build();
 
-            when(passwordEncoder.encode(any())).thenReturn("_" + mockUserRequest.getUsername());
+            when(passwordEncoder.encode(any())).thenReturn("_" + userDTO.getUsername());
             when(usersRepository.findAll()).thenReturn(createUsers());
 
-            sut.update(mockUserRequest);
+            sut.update(userDTO);
 
             verify(usersRepository).save(mockUserToUpdate);
         }
@@ -273,7 +274,7 @@ class UsersServiceTest {
         @Test
         @DisplayName("when license conditions are met and user exists then update user")
         void updateUserLicense() throws Exception {
-            final UserRequest mockUserRequest = UserRequest.builder()
+            final UserDTO userDTO = UserDTO.builder()
                     .id(1)
                     .username("foo 1")
                     .fullname("bar 1")
@@ -282,18 +283,18 @@ class UsersServiceTest {
                     .build();
 
             User mockUserToUpdate = User.builder()
-                    .id(mockUserRequest.getId())
-                    .username(mockUserRequest.getUsername())
-                    .password("_" + mockUserRequest.getUsername())
-                    .fullname(mockUserRequest.getFullname())
-                    .roles(mockUserRequest.getPrivileges())
-                    .license(mockUserRequest.getLicense())
+                    .id(userDTO.getId())
+                    .username(userDTO.getUsername())
+                    .password("_" + userDTO.getUsername())
+                    .fullname(userDTO.getFullname())
+                    .roles(userDTO.getPrivileges())
+                    .license(userDTO.getLicense())
                     .build();
 
-            when(passwordEncoder.encode(any())).thenReturn("_" + mockUserRequest.getUsername());
+            when(passwordEncoder.encode(any())).thenReturn("_" + userDTO.getUsername());
             when(usersRepository.findAll()).thenReturn(createUsers());
 
-            sut.update(mockUserRequest);
+            sut.update(userDTO);
 
             verify(usersRepository).save(mockUserToUpdate);
         }
