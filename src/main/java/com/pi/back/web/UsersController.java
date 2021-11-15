@@ -2,6 +2,7 @@ package com.pi.back.web;
 
 import com.pi.back.db.User;
 import com.pi.back.services.UsersService;
+import com.pi.back.web.users.UserDTO;
 import com.pi.back.web.users.UserRequest;
 import com.pi.back.web.users.UserResponse;
 import com.pi.back.web.users.UsersResponse;
@@ -84,14 +85,20 @@ public class UsersController {
     @PutMapping("/users/{userId}")
     public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UserRequest request,
                                                    @PathVariable(name = "userId") Integer userId) {
-        request.setId(userId);
+        UserDTO dto = UserDTO.builder()
+                .id(userId)
+                .fullname(request.getFullname())
+                .license(request.getLicense())
+                .username(request.getUsername())
+                .privileges(request.getPrivileges())
+                .build();
         try {
-            User updatedUser = usersService.update(request);
+            User updatedUser = usersService.update(dto);
             return ResponseEntity.ok(UserResponse.newDetailedInstance(updatedUser));
         } catch (InvalidParameterException | InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(UserResponse.newErrorInstance(e));
         } catch (ClassNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(UserResponse.newErrorInstance(e));
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

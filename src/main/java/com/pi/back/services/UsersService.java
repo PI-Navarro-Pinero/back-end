@@ -2,6 +2,7 @@ package com.pi.back.services;
 
 import com.pi.back.db.User;
 import com.pi.back.db.UsersRepository;
+import com.pi.back.web.users.UserDTO;
 import com.pi.back.web.users.UserRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -58,15 +58,14 @@ public class UsersService {
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
-            List<Integer> users = allUsers.stream().filter(condition).map(User::getId).collect(Collectors.toList());
             throw new InvalidAttributesException("Requested user creation failed: " +
-                    "A user with the same username or license already exists: " + users);
+                    "A user with the same username or license already exists");
         }
 
         return this.usersRepository.save(newUser);
     }
 
-    public User update(UserRequest request) throws Exception {
+    public User update(UserDTO request) throws Exception {
 
         final User userToUpdate = User.builder()
                 .id(request.getId())
@@ -99,9 +98,8 @@ public class UsersService {
 
         final boolean conditionMeets = allUsers.stream().anyMatch(condition);
         if (conditionMeets) {
-            List<Integer> users = allUsers.stream().filter(condition).map(User::getId).collect(Collectors.toList());
             throw new InvalidAttributesException("Requested user update failed: " +
-                    "A user with the same username or license already exists: " + users);
+                    "A user with the same username or license already exists");
         }
 
         return this.usersRepository.save(userToUpdate);
@@ -110,14 +108,14 @@ public class UsersService {
     public void delete(Integer userId) throws NoSuchElementException {
         final Optional<User> userToDelete = usersRepository.findById(userId);
 
-        if (userToDelete.isEmpty()) { // esto debiera retornar NoSuchElementException
+        if (userToDelete.isEmpty()) {
             log.error("Non-existent user with id {} requested for deleting.", userId);
             throw new NoSuchElementException("Requested user deletion failed: User with such ID does not exist.");
         }
 
         if (userId == 0) {
             log.error("Forbidden ID (0) provided for user deleting.");
-            throw new InvalidParameterException("Requested user update failed: Invalid ID.");
+            throw new InvalidParameterException("Requested user deletion failed: Forbidden ID.");
         }
 
         usersRepository.delete(userToDelete.get());

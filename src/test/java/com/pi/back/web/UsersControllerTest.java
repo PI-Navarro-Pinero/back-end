@@ -227,8 +227,7 @@ class UsersControllerTest {
             mockMvc.perform(put(USER_URI_PATH)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(asJsonString(mockRequest)))
-                    .andExpect(status().isNoContent())
-                    .andExpect(jsonPath("$.error", is(exceptionMessage)));
+                    .andExpect(status().isNotFound());
         }
 
         @Test
