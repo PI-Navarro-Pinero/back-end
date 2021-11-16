@@ -34,7 +34,6 @@ public class WeaponryInitializer {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             return yaml.load(br);
         } catch (Exception e) {
-            log.error("Error loading file: {}", e.getMessage());
             return null;
         }
     }
