@@ -20,7 +20,6 @@ public class WeaponryInitializer {
 
     @Bean
     public Weaponry loadWeaponsYaml() {
-        Yaml yaml = new Yaml(new Constructor(Weaponry.class));
         String fileToOpen = BASE_DIR + "/weapons.yaml";
         File file;
 
@@ -31,6 +30,11 @@ public class WeaponryInitializer {
             return null;
         }
 
+        Yaml yaml = new Yaml(new Constructor(Weaponry.class));
+        return loadYaml(file, yaml);
+    }
+
+    protected Weaponry loadYaml(File file, Yaml yaml) {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             return yaml.load(br);
         } catch (Exception e) {

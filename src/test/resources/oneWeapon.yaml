@@ -1,0 +1,5 @@
+weaponry:
+  - name:
+    description: Nmap tool for performing a ping-only scan
+    actions:
+      - nmap -sn [target]
