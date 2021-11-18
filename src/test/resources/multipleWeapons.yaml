@@ -1,0 +1,10 @@
+weaponry:
+  - name: Nmap
+    description: Nmap tool for performing a ping-only scan
+    actions:
+      - nmap -sn [target]
+  - name: Aircrack-ng
+    description: Tools to assess WiFi network security
+    actions:
+      - airodump-ng [interface]
+      - airodump-ng --bssid [target MAC] [interface]
