@@ -1,0 +1,5 @@
+weaponry:
+  - name: foo
+    description: foobar
+    actions:
+      -

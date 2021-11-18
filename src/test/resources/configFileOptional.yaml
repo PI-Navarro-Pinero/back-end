@@ -1,0 +1,10 @@
+weaponry:
+  - name: foo
+    description: bar
+    actions:
+      - foobar
+  - name: waldo
+    description: quz
+    configurationFile: /path/to/configuration/file
+    actions:
+      - baz
