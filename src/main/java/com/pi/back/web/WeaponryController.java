@@ -103,7 +103,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/weaponry/{weaponId}/actions/{actionId}")
+    @PostMapping("/weaponry/{weaponId}/actions/{actionId}")
     public ResponseEntity<ActionResponse> executeAction(@PathVariable(name = "weaponId") Integer weaponId,
                                                         @PathVariable(name = "actionId") Integer actionId,
                                                         @RequestParam(name = "parameters", required = false) List<String> parameters) {
@@ -121,7 +121,7 @@ public class WeaponryController {
 
     @Secured(ROLE_AGENT)
     @GetMapping("/actions")
-    public ResponseEntity<ActionsResponse> allActions() {
+    public ResponseEntity<ActionsResponse> getLaunchedActions() {
         try {
             List<ActionResponse> finalizedActionResponseList = systemService.getFinalizedActions()
                     .values().stream()
@@ -146,8 +146,8 @@ public class WeaponryController {
 
     @Secured(ROLE_AGENT)
     @GetMapping("/actions/{pid}/stdout")
-    public ResponseEntity<String> actionStdout(@PathVariable(name = "pid") Long pid,
-                                               @RequestParam(name = "lines", required = false) Integer lines) {
+    public ResponseEntity<String> readActionStdout(@PathVariable(name = "pid") Long pid,
+                                                   @RequestParam(name = "lines", required = false) Integer lines) {
         try {
             String pathname = systemService.getProcessPathname(pid);
             String command = "tail" +
@@ -166,7 +166,7 @@ public class WeaponryController {
 
     @Secured(ROLE_AGENT)
     @GetMapping("/actions/{pid}/files")
-    public ResponseEntity<String> actionOutput(@PathVariable(name = "pid") Long pid) {
+    public ResponseEntity<String> getActionOutput(@PathVariable(name = "pid") Long pid) {
         try {
             String command = "ls -I " + pid + " " + systemService.getProcessDirectoryPathname(pid);
             String result = systemService.runCommand(command);
@@ -201,7 +201,7 @@ public class WeaponryController {
 
     @Secured(ROLE_AGENT)
     @GetMapping("/actions/active")
-    public ResponseEntity<ActionsResponse> runningActions() {
+    public ResponseEntity<ActionsResponse> getCurrentRunningActions() {
         try {
             List<ActionResponse> actionResponseList = systemService.getRunningActions()
                     .values().stream()
@@ -219,8 +219,8 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions/active/{pid}/terminate")
-    public ResponseEntity<String> killRunningAction(@PathVariable(name = "pid") Long pid) {
+    @DeleteMapping("/actions/active/{pid}/terminate")
+    public ResponseEntity<String> killCurrentRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
             systemService.killRunningAction(pid);
             return ResponseEntity.ok().build();
@@ -232,9 +232,9 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions/active/{pid}/input")
-    public ResponseEntity<String> actionInput(@PathVariable(name = "pid") Long pid,
-                                              @RequestParam(name = "input", required = false) String input) {
+    @PutMapping("/actions/active/{pid}/input")
+    public ResponseEntity<String> inputIntoRunningAction(@PathVariable(name = "pid") Long pid,
+                                                         @RequestParam(name = "input", required = false) String input) {
         try {
             systemService.inputToProcess(pid, input);
             return ResponseEntity.ok().build();
