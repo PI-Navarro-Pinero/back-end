@@ -53,7 +53,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/weaponry/{weaponId}/actions")
+    @GetMapping("/weaponry/{weaponId}")
     public ResponseEntity<WeaponResponse> fetchWeaponActions(@PathVariable(name = "weaponId") Integer weaponId) {
         try {
             Weapon weapon = systemService.getWeapon(weaponId);
@@ -120,7 +120,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions")
+    @GetMapping("/launched-actions")
     public ResponseEntity<ActionsResponse> getLaunchedActions() {
         try {
             List<ActionResponse> finalizedActionResponseList = systemService.getFinalizedActions()
@@ -145,7 +145,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions/{pid}/stdout")
+    @GetMapping("/launched-actions/{pid}/stdout")
     public ResponseEntity<String> readActionStdout(@PathVariable(name = "pid") Long pid,
                                                    @RequestParam(name = "lines", required = false) Integer lines) {
         try {
@@ -165,7 +165,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions/{pid}/files")
+    @GetMapping("/launched-actions/{pid}/files")
     public ResponseEntity<String> getActionOutput(@PathVariable(name = "pid") Long pid) {
         try {
             String command = "ls -I " + pid + " " + systemService.getProcessDirectoryPathname(pid);
@@ -185,7 +185,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions/{pid}/files/{fileName}")
+    @GetMapping("/launched-actions/{pid}/files/{fileName}")
     public ResponseEntity<String> readActionOutputFile(@PathVariable(name = "pid") Long pid,
                                                        @PathVariable(name = "fileName") String fileName) {
         try {
@@ -200,7 +200,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @GetMapping("/actions/active")
+    @GetMapping("/launched-actions/active")
     public ResponseEntity<ActionsResponse> getCurrentRunningActions() {
         try {
             List<ActionResponse> actionResponseList = systemService.getRunningActions()
@@ -219,7 +219,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @DeleteMapping("/actions/active/{pid}/terminate")
+    @DeleteMapping("/launched-actions/active/{pid}/terminate")
     public ResponseEntity<String> killCurrentRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
             systemService.killRunningAction(pid);
@@ -232,7 +232,7 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @PutMapping("/actions/active/{pid}/input")
+    @PutMapping("/launched-actions/active/{pid}/input")
     public ResponseEntity<String> inputIntoRunningAction(@PathVariable(name = "pid") Long pid,
                                                          @RequestParam(name = "input", required = false) String input) {
         try {
