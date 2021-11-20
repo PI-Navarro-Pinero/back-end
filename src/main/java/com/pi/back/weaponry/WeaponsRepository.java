@@ -42,12 +42,12 @@ public class WeaponsRepository {
         }
     }
 
-    public Optional<String> getConfigurationFilePath(Integer weaponId) throws InvalidAttributesException {
+    public String getConfigurationFilePath(Integer weaponId) throws InvalidAttributesException {
         Optional<Weapon> optionalWeapon = findWeapon(weaponId);
         if (optionalWeapon.isEmpty())
             throw new InvalidAttributesException("Weapon " + weaponId + " do not exists");
 
-        return optionalWeapon.map(Weapon::getConfigurationFile);
+        return optionalWeapon.get().getConfigurationFile();
     }
 
     private Optional<List<String>> findAction(Integer weaponId) {
