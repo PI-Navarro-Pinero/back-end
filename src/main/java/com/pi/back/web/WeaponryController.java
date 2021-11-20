@@ -234,9 +234,9 @@ public class WeaponryController {
     }
 
     @Secured(ROLE_AGENT)
-    @PutMapping("/launched-actions/active/{pid}/input")
+    @PutMapping("/launched-actions/active/{pid}/stdin")
     public ResponseEntity<String> inputIntoRunningAction(@PathVariable(name = "pid") Long pid,
-                                                         @RequestParam(name = "input", required = false) String input) {
+                                                         @RequestParam(name = "stdin", required = false) String input) {
         try {
             systemService.inputToProcess(pid, input);
             return ResponseEntity.ok().build();
