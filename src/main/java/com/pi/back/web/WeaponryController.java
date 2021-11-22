@@ -113,7 +113,7 @@ public class WeaponryController {
             WeaponProcess weaponProcess = systemService.runAction(weaponId, actionId, parameters);
             return ResponseEntity.ok().body(ActionResponse.newInstance(weaponProcess));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(ActionResponse.newErrorInstance(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(ActionResponse.newErrorInstance(e.getMessage()));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ActionResponse.newErrorInstance(e.getMessage()));
         } catch (Exception e) {
