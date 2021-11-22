@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,10 +45,16 @@ public class WeaponsRepository {
 
     public String getConfigurationFilePath(Integer weaponId) throws InvalidAttributesException {
         Optional<Weapon> optionalWeapon = findWeapon(weaponId);
+
         if (optionalWeapon.isEmpty())
             throw new InvalidAttributesException("Weapon " + weaponId + " do not exists");
 
-        return optionalWeapon.get().getConfigurationFile();
+        File configurationFile = optionalWeapon.get().getConfigFile();
+
+        if (configurationFile == null)
+            throw new InvalidAttributesException("Requested weapon " + weaponId + " does not require a configuration file.");
+
+        return configurationFile.getAbsolutePath();
     }
 
     private Optional<List<String>> findAction(Integer weaponId) {

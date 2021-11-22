@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class WeaponResponse {
 
     private Integer id;
@@ -32,16 +32,16 @@ public class WeaponResponse {
         return WeaponResponse.builder()
                 .id(id)
                 .name(weapon.getName())
-                .configurationFile(!weapon.getConfigurationFile().isBlank())
+                .configurationFile(weapon.getConfigFile() != null)
                 .description(weapon.getDescription())
                 .actions(weapon.getActions().stream()
                         .collect(Collectors.toMap(i -> index.getAndIncrement(), s -> s)))
                 .build();
     }
 
-    public static WeaponResponse newErrorInstance(Exception error) {
+    public static WeaponResponse newErrorInstance(String error) {
         return WeaponResponse.builder()
-                .error(error.getMessage())
+                .error(error)
                 .build();
     }
 }

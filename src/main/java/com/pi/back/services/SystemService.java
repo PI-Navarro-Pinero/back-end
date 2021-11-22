@@ -70,15 +70,12 @@ public class SystemService {
     }
 
     public String runCommand(String command) throws IOException {
-        BufferedReader br;
-
         try {
-            br = systemManager.execute(command);
+            BufferedReader br = systemManager.execute(command);
+            return br.lines().collect(Collectors.joining("\n"));
         } catch (Exception e) {
             throw new IOException("Command '" + command + "' execution failed.");
         }
-
-        return br.lines().collect(Collectors.joining("\n"));
     }
 
     public String getProcessPathname(Long pid) throws InvalidAttributesException {
@@ -122,16 +119,14 @@ public class SystemService {
     }
 
     public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {
-        String configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
-
-        if (configurationFilePath.isBlank()) {
-            String msg = "Requested weapon " + weaponId + " does not require a configuration file.";
-            log.warn(msg);
-            throw new IOException(msg);
+        try {
+            String configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
+            log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
+            return configurationFilePath;
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
         }
-
-        log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
-        return configurationFilePath;
     }
 
     public Map<Long, WeaponProcess> getRunningActions() {
