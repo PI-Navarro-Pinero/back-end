@@ -67,8 +67,8 @@ class WeaponryInitializerTest {
         Weapon actualWeaponTwo = actual.getWeaponry().get(1);
 
         assertThat(actual.getWeaponry().size()).isEqualTo(2);
-        assertThat(actualWeaponOne.getConfigurationFile()).isEqualTo("");
-        assertThat(actualWeaponTwo.getConfigurationFile()).isEqualTo("/path/to/configuration/file");
+        assertThat(actualWeaponOne.getConfigFile()).isEqualTo(null);
+        assertThat(actualWeaponTwo.getConfigFile().getPath()).isEqualTo("src/test/resources/configFileOptional.yaml");
     }
 
     @Test

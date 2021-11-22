@@ -5,6 +5,6 @@ weaponry:
       - foobar
   - name: waldo
     description: quz
-    configurationFile: /path/to/configuration/file
+    configurationFile: src/test/resources/configFileOptional.yaml
     actions:
       - baz

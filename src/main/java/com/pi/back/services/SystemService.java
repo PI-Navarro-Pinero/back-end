@@ -119,16 +119,14 @@ public class SystemService {
     }
 
     public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {
-        String configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
-
-        if (configurationFilePath.isBlank()) {
-            String msg = "Requested weapon " + weaponId + " does not require a configuration file.";
-            log.warn(msg);
-            throw new InvalidAttributesException(msg);
+        try {
+            String configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
+            log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
+            return configurationFilePath;
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
         }
-
-        log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
-        return configurationFilePath;
     }
 
     public Map<Long, WeaponProcess> getRunningActions() {

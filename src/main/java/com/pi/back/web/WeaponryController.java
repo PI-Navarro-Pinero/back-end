@@ -57,10 +57,9 @@ public class WeaponryController {
     public ResponseEntity<WeaponResponse> fetchWeaponActions(@PathVariable(name = "weaponId") Integer weaponId) {
         try {
             Weapon weapon = systemService.getWeapon(weaponId);
-            return ResponseEntity.ok(WeaponResponse
-                    .newInstance(weaponId, weapon));
+            return ResponseEntity.ok(WeaponResponse.newInstance(weaponId, weapon));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(WeaponResponse.newErrorInstance(e));
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(WeaponResponse.newErrorInstance(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
