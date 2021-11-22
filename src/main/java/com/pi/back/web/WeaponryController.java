@@ -96,8 +96,10 @@ public class WeaponryController {
                 configurationFile = new String(Base64.getDecoder().decode(configurationFile.getBytes()));
             systemService.writeFile(pathname, configurationFile);
             return ResponseEntity.ok().build();
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
