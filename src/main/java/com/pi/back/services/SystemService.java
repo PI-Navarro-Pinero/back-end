@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,15 +37,17 @@ public class SystemService {
         this.systemManager = systemManager;
     }
 
-    public WeaponProcess runAction(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, ExecutionException, IOException {
+    public WeaponProcess runAction(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, IOException {
         String command = retrieveCommandModel(weaponId, actionId);
 
         try {
             command = commandManager.buildCommand(command, queryParamsList);
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
         } catch (Exception e) {
-            String errMsg = e.getMessage();
-            log.error(errMsg);
-            throw new InvalidAttributesException(errMsg);
+            log.error("Unexpected error when building command '{}' with parameters {}: ", command, queryParamsList, e);
+            throw e;
         }
 
         Weapon weapon = getWeapon(weaponId);
@@ -114,8 +115,11 @@ public class SystemService {
     public Weapon getWeapon(Integer weaponId) throws InvalidAttributesException {
         Optional<Weapon> optionalWeapon = weaponsRepository.findWeapon(weaponId);
 
-        return optionalWeapon.orElseThrow(() ->
-                new InvalidAttributesException("Requested weapon with id " + weaponId + " does not exists."));
+        return optionalWeapon.orElseThrow(() -> {
+            String errMsg = "Requested weapon with id " + weaponId + " does not exists.";
+            log.info(errMsg);
+            return new InvalidAttributesException(errMsg);
+        });
     }
 
     public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {

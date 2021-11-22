@@ -37,7 +37,7 @@ public class WeaponsRepository {
 
     public Optional<Weapon> findWeapon(Integer weaponId) {
         try {
-            return Optional.ofNullable(weaponsList.getWeaponry().get(weaponId));
+            return Optional.of(weaponsList.getWeaponry().get(weaponId));
         } catch (Exception e) {
             return Optional.empty();
         }

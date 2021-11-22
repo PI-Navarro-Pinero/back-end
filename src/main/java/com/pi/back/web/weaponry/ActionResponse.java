@@ -36,9 +36,9 @@ public class ActionResponse {
                 .build();
     }
 
-    public static ActionResponse newErrorInstance(Exception exception) {
+    public static ActionResponse newErrorInstance(String message) {
         return ActionResponse.builder()
-                .error(exception.getMessage())
+                .error(message)
                 .build();
     }
 }
