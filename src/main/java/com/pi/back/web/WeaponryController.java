@@ -72,15 +72,14 @@ public class WeaponryController {
                                                        @RequestParam(value = "encode", required = false, defaultValue = "0") Boolean encode) {
         try {
             String pathname = systemService.getConfigurationFilePath(weaponId);
-            String command = "cat " + pathname;
-            String result = systemService.runCommand(command);
+            String result = systemService.runCommand("cat " + pathname);
             if (encode)
                 result = new String(Base64.getEncoder().encode(result.getBytes()));
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -97,8 +96,10 @@ public class WeaponryController {
                 configurationFile = new String(Base64.getDecoder().decode(configurationFile.getBytes()));
             systemService.writeFile(pathname, configurationFile);
             return ResponseEntity.ok().build();
+        } catch (InvalidAttributesException e) {
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
