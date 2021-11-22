@@ -72,8 +72,7 @@ public class WeaponryController {
                                                        @RequestParam(value = "encode", required = false, defaultValue = "0") Boolean encode) {
         try {
             String pathname = systemService.getConfigurationFilePath(weaponId);
-            String command = "cat " + pathname;
-            String result = systemService.runCommand(command);
+            String result = systemService.runCommand("cat " + pathname);
             if (encode)
                 result = new String(Base64.getEncoder().encode(result.getBytes()));
             return ResponseEntity.ok().body(result);
