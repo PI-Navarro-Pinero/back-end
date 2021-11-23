@@ -38,13 +38,8 @@ public class OperationsService {
     }
 
     public WeaponProcess runAction(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, IOException {
-        String command;
-        try {
-            command = retrieveCommandModel(weaponId, actionId);
-        } catch (InvalidAttributesException e) {
-            log.info(e.getMessage());
-            throw e;
-        }
+        Weapon weapon = getWeapon(weaponId);
+        String command = getCommandModelOf(weapon, actionId);
 
         try {
             command = commandValidator.buildCommand(command, queryParamsList);
@@ -56,7 +51,6 @@ public class OperationsService {
             throw e;
         }
 
-        Weapon weapon = getWeapon(weaponId);
         String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + LocalDateTime.now() + "/" + actionId;
         Process process = null;
         File outputFile;
@@ -129,15 +123,11 @@ public class OperationsService {
     }
 
     public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {
-        try {
-            String configurationFilePath = weaponsRepository.getConfigurationFilePath(weaponId);
-            log.info("Configuration file path for weapon {} has been retrieved.", weaponId);
-            return configurationFilePath;
-        } catch (InvalidAttributesException e) {
-            log.info(e.getMessage());
-            throw e;
-        }
+        Weapon weapon = getWeapon(weaponId);
+        return getConfigurationFilePathOf(weapon);
     }
+
+
 
     public Map<Long, WeaponProcess> getRunningActions() {
         return processesManager.getAllRunningProcesses();
@@ -180,13 +170,26 @@ public class OperationsService {
         }
     }
 
-    private String retrieveCommandModel(Integer weaponId, Integer actionId) throws InvalidAttributesException {
-        Optional<String> optionalModel = weaponsRepository.getActionModel(weaponId, actionId);
+    private String getCommandModelOf(Weapon weapon, Integer actionId) throws InvalidAttributesException {
+        try {
+            return weapon.getActions().get(actionId);
+        } catch (IndexOutOfBoundsException e) {
+            String errMsg = "Weapon '" + weapon.getName() + "' does not contain any action with id " + actionId;
+            log.info(errMsg);
+            throw new InvalidAttributesException(errMsg);
+        }
+    }
 
-        if (optionalModel.isPresent())
-            return optionalModel.get();
+    private String getConfigurationFilePathOf(Weapon weapon) throws InvalidAttributesException {
+        File configurationFile = weapon.getConfigFile();
 
-        String errMsg = "Weapon with id " + weaponId + " does not contain any action with id " + actionId + "";
-        throw new InvalidAttributesException(errMsg);
+        if (configurationFile == null) {
+            String errMsg = "Requested weapon '" + weapon.getName() + "' does not require a configuration file";
+            log.info(errMsg);
+            throw new InvalidAttributesException(errMsg);
+        }
+
+        log.info("Configuration file path for weapon '{}' has been retrieved.", weapon.getName());
+        return configurationFile.getAbsolutePath();
     }
 }

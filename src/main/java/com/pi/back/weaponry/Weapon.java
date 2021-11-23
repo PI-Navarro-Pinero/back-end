@@ -7,15 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.util.List;
 
-@Getter
 @NoArgsConstructor
 @Slf4j
 public class Weapon {
+    @Getter
     private String name;
+    @Getter
     private String description;
     private String configurationFile;
+    @Getter
     private List<String> actions;
-
     private File configFile;
 
     public File getConfigFile() {
