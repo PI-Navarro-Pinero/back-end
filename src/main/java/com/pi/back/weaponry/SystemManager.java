@@ -43,8 +43,7 @@ public class SystemManager {
             log.info("Command '{}' executed successfully", command);
             return process;
         } catch (Exception e) {
-            log.error("Error executing command '{}': {}", command, e.getMessage());
-            log.debug("Exception '{}' thrown when executing command '{}': '{}'", e.getClass(), command, e.getCause());
+            log.error("Error while executing command '{}': {}", command, e);
             throw e;
         }
     }
