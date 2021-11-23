@@ -38,7 +38,13 @@ public class SystemService {
     }
 
     public WeaponProcess runAction(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, IOException {
-        String command = retrieveCommandModel(weaponId, actionId);
+        String command;
+        try {
+            command = retrieveCommandModel(weaponId, actionId);
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
+        }
 
         try {
             command = commandManager.buildCommand(command, queryParamsList);
@@ -175,13 +181,12 @@ public class SystemService {
     }
 
     private String retrieveCommandModel(Integer weaponId, Integer actionId) throws InvalidAttributesException {
-        Optional<String> commandModel = weaponsRepository.getActionModel(weaponId, actionId);
+        Optional<String> optionalModel = weaponsRepository.getActionModel(weaponId, actionId);
 
-        if (commandModel.isPresent())
-            return commandModel.get();
+        if (optionalModel.isPresent())
+            return optionalModel.get();
 
-        String errMsg = "Provided weaponId '" + weaponId + "' or actionId '" + actionId + "' are invalid.";
-        log.error(errMsg);
+        String errMsg = "Weapon with id " + weaponId + " does not contain any action with id " + actionId + "";
         throw new InvalidAttributesException(errMsg);
     }
 }
