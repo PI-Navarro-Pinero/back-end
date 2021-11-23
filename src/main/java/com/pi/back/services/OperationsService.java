@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -70,10 +70,10 @@ public class OperationsService {
         return weaponProcess;
     }
 
-    public String runCommand(String command) throws IOException {
+    public Stream<String> runCommand(String command) throws IOException {
         try {
             BufferedReader br = systemManager.execute(command);
-            return br.lines().collect(Collectors.joining("\n"));
+            return br.lines();
         } catch (Exception e) {
             throw new IOException("Command '" + command + "' execution failed.");
         }
