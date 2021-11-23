@@ -17,21 +17,21 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class SystemService {
+public class OperationsService {
 
     private final String OUTPUTS_DIR = FileSystem.OUTPUTS.getPath();
 
-    private final CommandManager commandManager;
+    private final CommandValidator commandValidator;
     private final ProcessesManager processesManager;
     private final WeaponsRepository weaponsRepository;
     private final SystemManager systemManager;
 
     @Autowired
-    public SystemService(CommandManager commandManager,
-                         WeaponsRepository weaponsRepository,
-                         ProcessesManager processesManager,
-                         SystemManager systemManager) {
-        this.commandManager = commandManager;
+    public OperationsService(CommandValidator commandValidator,
+                             WeaponsRepository weaponsRepository,
+                             ProcessesManager processesManager,
+                             SystemManager systemManager) {
+        this.commandValidator = commandValidator;
         this.weaponsRepository = weaponsRepository;
         this.processesManager = processesManager;
         this.systemManager = systemManager;
@@ -47,7 +47,7 @@ public class SystemService {
         }
 
         try {
-            command = commandManager.buildCommand(command, queryParamsList);
+            command = commandValidator.buildCommand(command, queryParamsList);
         } catch (InvalidAttributesException e) {
             log.info(e.getMessage());
             throw e;

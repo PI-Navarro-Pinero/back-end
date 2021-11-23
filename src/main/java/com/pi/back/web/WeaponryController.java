@@ -1,6 +1,6 @@
 package com.pi.back.web;
 
-import com.pi.back.services.SystemService;
+import com.pi.back.services.OperationsService;
 import com.pi.back.weaponry.Weapon;
 import com.pi.back.weaponry.WeaponProcess;
 import com.pi.back.web.weaponry.ActionResponse;
@@ -17,7 +17,6 @@ import javax.naming.directory.InvalidAttributesException;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -26,17 +25,17 @@ import static com.pi.back.config.security.Privileges.Roles.ROLE_AGENT;
 @RestController
 public class WeaponryController {
 
-    private final SystemService systemService;
+    private final OperationsService operationsService;
 
     @Autowired
-    public WeaponryController(SystemService systemService) {
-        this.systemService = systemService;
+    public WeaponryController(OperationsService operationsService) {
+        this.operationsService = operationsService;
     }
 
     @Secured(ROLE_AGENT)
     @GetMapping("/weaponry")
     public ResponseEntity<WeaponsResponse> fetchWeaponry() {
-        List<Weapon> weaponMap = systemService.getAvailableWeapons();
+        List<Weapon> weaponMap = operationsService.getAvailableWeapons();
 
         AtomicInteger index = new AtomicInteger();
         final List<WeaponResponse> weaponsListResponse = weaponMap.stream()
@@ -56,7 +55,7 @@ public class WeaponryController {
     @GetMapping("/weaponry/{weaponId}")
     public ResponseEntity<WeaponResponse> fetchWeaponActions(@PathVariable(name = "weaponId") Integer weaponId) {
         try {
-            Weapon weapon = systemService.getWeapon(weaponId);
+            Weapon weapon = operationsService.getWeapon(weaponId);
             return ResponseEntity.ok(WeaponResponse.newInstance(weaponId, weapon));
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(WeaponResponse.newErrorInstance(e.getMessage()));
@@ -70,8 +69,8 @@ public class WeaponryController {
     public ResponseEntity<String> getConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
                                                        @RequestParam(value = "encode", required = false, defaultValue = "0") Boolean encode) {
         try {
-            String pathname = systemService.getConfigurationFilePath(weaponId);
-            String result = systemService.runCommand("cat " + pathname);
+            String pathname = operationsService.getConfigurationFilePath(weaponId);
+            String result = operationsService.runCommand("cat " + pathname);
             if (encode)
                 result = new String(Base64.getEncoder().encode(result.getBytes()));
             return ResponseEntity.ok().body(result);
@@ -90,10 +89,10 @@ public class WeaponryController {
                                                        @RequestBody String configurationFile,
                                                        @RequestParam(required = false) boolean encoded) {
         try {
-            String pathname = systemService.getConfigurationFilePath(weaponId);
+            String pathname = operationsService.getConfigurationFilePath(weaponId);
             if (encoded)
                 configurationFile = new String(Base64.getDecoder().decode(configurationFile.getBytes()));
-            systemService.writeFile(pathname, configurationFile);
+            operationsService.writeFile(pathname, configurationFile);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
@@ -110,7 +109,7 @@ public class WeaponryController {
                                                         @PathVariable(name = "actionId") Integer actionId,
                                                         @RequestParam(name = "parameters", required = false) List<String> parameters) {
         try {
-            WeaponProcess weaponProcess = systemService.runAction(weaponId, actionId, parameters);
+            WeaponProcess weaponProcess = operationsService.runAction(weaponId, actionId, parameters);
             return ResponseEntity.ok().body(ActionResponse.newInstance(weaponProcess));
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(ActionResponse.newErrorInstance(e.getMessage()));
@@ -125,12 +124,12 @@ public class WeaponryController {
     @GetMapping("/launched-actions")
     public ResponseEntity<ActionsResponse> getLaunchedActions() {
         try {
-            List<ActionResponse> finalizedActionResponseList = systemService.getFinalizedActions()
+            List<ActionResponse> finalizedActionResponseList = operationsService.getFinalizedActions()
                     .values().stream()
                     .map(ActionResponse::newStatusInstance)
                     .collect(Collectors.toList());
 
-            List<ActionResponse> runningActionResponseList = systemService.getRunningActions()
+            List<ActionResponse> runningActionResponseList = operationsService.getRunningActions()
                     .values().stream()
                     .map(ActionResponse::newStatusInstance)
                     .collect(Collectors.toList());
@@ -151,11 +150,11 @@ public class WeaponryController {
     public ResponseEntity<String> readActionStdout(@PathVariable(name = "pid") Long pid,
                                                    @RequestParam(name = "lines", required = false) Integer lines) {
         try {
-            String pathname = systemService.getProcessPathname(pid);
+            String pathname = operationsService.getProcessPathname(pid);
             String command = "tail" +
                     (lines == null ? (" +0") : (" -" + lines))
                     + " " + pathname;
-            String result = systemService.runCommand(command);
+            String result = operationsService.runCommand(command);
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -170,8 +169,8 @@ public class WeaponryController {
     @GetMapping("/launched-actions/{pid}/files")
     public ResponseEntity<String> getActionOutput(@PathVariable(name = "pid") Long pid) {
         try {
-            String command = "ls -I " + pid + " " + systemService.getProcessDirectoryPathname(pid);
-            String result = systemService.runCommand(command);
+            String command = "ls -I " + pid + " " + operationsService.getProcessDirectoryPathname(pid);
+            String result = operationsService.runCommand(command);
 
             if (result.isBlank())
                 return ResponseEntity.noContent().build();
@@ -191,8 +190,8 @@ public class WeaponryController {
     public ResponseEntity<String> readActionOutputFile(@PathVariable(name = "pid") Long pid,
                                                        @PathVariable(name = "fileName") String fileName) {
         try {
-            String pathname = systemService.getProcessDirectoryPathname(pid) + "/" + fileName;
-            String result = systemService.readFile(pathname);
+            String pathname = operationsService.getProcessDirectoryPathname(pid) + "/" + fileName;
+            String result = operationsService.readFile(pathname);
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -205,7 +204,7 @@ public class WeaponryController {
     @GetMapping("/launched-actions/active")
     public ResponseEntity<ActionsResponse> getCurrentRunningActions() {
         try {
-            List<ActionResponse> actionResponseList = systemService.getRunningActions()
+            List<ActionResponse> actionResponseList = operationsService.getRunningActions()
                     .values().stream()
                     .map(ActionResponse::newStatusInstance)
                     .collect(Collectors.toList());
@@ -224,7 +223,7 @@ public class WeaponryController {
     @DeleteMapping("/launched-actions/active/{pid}/terminate")
     public ResponseEntity<String> killCurrentRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
-            systemService.killRunningAction(pid);
+            operationsService.killRunningAction(pid);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
@@ -238,7 +237,7 @@ public class WeaponryController {
     public ResponseEntity<String> inputIntoRunningAction(@PathVariable(name = "pid") Long pid,
                                                          @RequestParam(name = "stdin", required = false) String input) {
         try {
-            systemService.inputToProcess(pid, input);
+            operationsService.inputToProcess(pid, input);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
