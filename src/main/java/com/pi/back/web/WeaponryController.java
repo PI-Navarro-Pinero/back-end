@@ -3,10 +3,7 @@ package com.pi.back.web;
 import com.pi.back.services.OperationsService;
 import com.pi.back.weaponry.Weapon;
 import com.pi.back.weaponry.WeaponProcess;
-import com.pi.back.web.weaponry.ActionResponse;
-import com.pi.back.web.weaponry.ActionsResponse;
-import com.pi.back.web.weaponry.WeaponResponse;
-import com.pi.back.web.weaponry.WeaponsResponse;
+import com.pi.back.web.weaponry.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +67,8 @@ public class WeaponryController {
                                                        @RequestParam(value = "encode", required = false, defaultValue = "0") Boolean encode) {
         try {
             String pathname = operationsService.getConfigurationFilePath(weaponId);
-            String result = operationsService.runCommand("cat " + pathname);
+            String result = operationsService.runCommand("cat " + pathname)
+                    .collect(Collectors.joining("\n"));
             if (encode)
                 result = new String(Base64.getEncoder().encode(result.getBytes()));
             return ResponseEntity.ok().body(result);
@@ -154,12 +152,13 @@ public class WeaponryController {
             String command = "tail" +
                     (lines == null ? (" +0") : (" -" + lines))
                     + " " + pathname;
-            String result = operationsService.runCommand(command);
+            String result = operationsService.runCommand(command)
+                    .collect(Collectors.joining("\n"));
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -167,19 +166,19 @@ public class WeaponryController {
 
     @Secured(ROLE_AGENT)
     @GetMapping("/launched-actions/{pid}/files")
-    public ResponseEntity<String> getActionOutput(@PathVariable(name = "pid") Long pid) {
+    public ResponseEntity<ActionOutputResponse> getActionOutput(@PathVariable(name = "pid") Long pid) {
         try {
             String command = "ls -I " + pid + " " + operationsService.getProcessDirectoryPathname(pid);
-            String result = operationsService.runCommand(command);
+            List<String> result = operationsService.runCommand(command).collect(Collectors.toList());
 
-            if (result.isBlank())
+            if (result.isEmpty())
                 return ResponseEntity.noContent().build();
 
-            return ResponseEntity.ok().body(result);
+            return ResponseEntity.ok(ActionOutputResponse.newInstance(result));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(ActionOutputResponse.newErrorInstance(e.getMessage()));
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ActionOutputResponse.newErrorInstance(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -194,7 +193,7 @@ public class WeaponryController {
             String result = operationsService.readFile(pathname);
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
