@@ -10,6 +10,7 @@ import javax.naming.directory.InvalidAttributesException;
 import java.io.*;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,7 +52,7 @@ public class OperationsService {
             throw e;
         }
 
-        String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + LocalDateTime.now() + "/" + actionId;
+        String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + LocalDateTime.now(ZoneOffset.UTC) + "/" + actionId;
         Process process = null;
         File outputFile;
         try {
@@ -126,8 +127,6 @@ public class OperationsService {
         Weapon weapon = getWeapon(weaponId);
         return getConfigurationFilePathOf(weapon);
     }
-
-
 
     public Map<Long, WeaponProcess> getRunningActions() {
         return processesManager.getAllRunningProcesses();
