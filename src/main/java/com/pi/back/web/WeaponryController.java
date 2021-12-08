@@ -149,9 +149,9 @@ public class WeaponryController {
                                                    @RequestParam(name = "lines", required = false) Integer lines) {
         try {
             String pathname = operationsService.getProcessPathname(pid);
-            String command = "tail" +
-                    (lines == null ? (" +0") : (" -" + lines))
-                    + " " + pathname;
+            String command = String.format("tail %s %s",
+                    (lines == null ? ("+0") : ("-" + lines)),
+                    pathname);
             String result = operationsService.runCommand(command)
                     .collect(Collectors.joining("\n"));
             return ResponseEntity.ok().body(result);
@@ -168,7 +168,7 @@ public class WeaponryController {
     @GetMapping("/launched-actions/{pid}/files")
     public ResponseEntity<ActionOutputResponse> getActionOutput(@PathVariable(name = "pid") Long pid) {
         try {
-            String command = "ls -I " + pid + " " + operationsService.getProcessDirectoryPathname(pid);
+            String command = String.format("ls %s", operationsService.getProcessDirectoryPathname(pid));
             List<String> result = operationsService.runCommand(command).collect(Collectors.toList());
 
             if (result.isEmpty())
@@ -189,7 +189,7 @@ public class WeaponryController {
     public ResponseEntity<String> readActionOutputFile(@PathVariable(name = "pid") Long pid,
                                                        @PathVariable(name = "fileName") String fileName) {
         try {
-            String pathname = operationsService.getProcessDirectoryPathname(pid) + "/" + fileName;
+            String pathname = String.format("%s/%s", operationsService.getProcessDirectoryPathname(pid), fileName);
             String result = operationsService.readFile(pathname);
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
