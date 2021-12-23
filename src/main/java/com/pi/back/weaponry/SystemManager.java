@@ -18,9 +18,15 @@ import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 @Component
 public class SystemManager {
 
+    private final ProcessesManager processesManager;
+
+    public SystemManager(ProcessesManager processesManager) {
+        this.processesManager = processesManager;
+    }
+
     public Process execute(String command, File outputFile) throws IOException {
-        List<String> splitCommand = List.of(command.split(" "));
-        ProcessBuilder procBuilder = new ProcessBuilder(splitCommand);
+        String[] commands = {"/bin/bash", "-c", command};
+        ProcessBuilder procBuilder = new ProcessBuilder(commands);
         procBuilder.redirectOutput(outputFile);
         procBuilder.redirectError(outputFile);
         procBuilder.directory(outputFile.getParentFile());
@@ -29,7 +35,8 @@ public class SystemManager {
     }
 
     public BufferedReader execute(String command) throws IOException {
-        ProcessBuilder procBuilder = new ProcessBuilder(List.of(command.split(" ")));
+        String[] commands = {"/bin/bash", "-c", command};
+        ProcessBuilder procBuilder = new ProcessBuilder(commands);
         Process proc = start(procBuilder);
 
         return new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -77,7 +84,7 @@ public class SystemManager {
             log.error(errMsg);
             throw new IOException(errMsg);
         }
-
+        log.info("File {} has been renamed to {}", fileToRename.getAbsolutePath(), name);
         return newFile;
     }
 
@@ -94,5 +101,19 @@ public class SystemManager {
         try (Stream<String> lines = Files.lines(path)) {
             return lines.collect(Collectors.joining("\n"));
         }
+    }
+
+    public void checksumResults(Process process) throws IOException {
+        File processFile = processesManager.getAllTerminatedProcesses()
+                .get(process.pid())
+                .getOutputFile();
+
+        String pathToParentFile = processFile.getParentFile().getAbsolutePath();
+
+        String command = String.format("find %s -type f ! -name \"SHA256-Sum.txt\" -exec sha256sum {} + > %s/SHA256-Sum.txt",
+                pathToParentFile,
+                pathToParentFile);
+
+        execute(command);
     }
 }
