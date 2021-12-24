@@ -30,6 +30,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -162,8 +164,32 @@ class OperationsServiceTest {
 
     @Nested
     class InputToProcessTestCase {
-        // when processesManager#getRunningProcess returns OutputStream then create PrintWriter, print and flush
-        // when processesManager#getRunningProcess throws InvalidAttributesException then re-throw
+
+        @Test
+        @DisplayName("when called then processManager#writeIntoProcess is invoked")
+        void writeIntoProcessIsInvoked() throws InvalidAttributesException {
+            sut.inputToProcess(1L, "foo");
+
+            verify(processesManager).writeIntoProcess(1L, "foo");
+        }
+
+        @Test
+        @DisplayName("when processesManager#getRunningProcess throws InvalidAttributesException then re-throw")
+        void invalidAttributesExceptionIsThrown() throws InvalidAttributesException {
+            doThrow(InvalidAttributesException.class).when(processesManager).writeIntoProcess(any(), any());
+
+            assertThatThrownBy(() -> sut.inputToProcess(1L, "foo"))
+                    .isExactlyInstanceOf(InvalidAttributesException.class);
+        }
+
+        @Test
+        @DisplayName("when processesManager#getRunningProcess throws Exception then re-throw")
+        void exceptionIsThrown() throws InvalidAttributesException {
+            doThrow(RuntimeException.class).when(processesManager).writeIntoProcess(any(), any());
+
+            assertThatThrownBy(() -> sut.inputToProcess(1L, "foo"))
+                    .isInstanceOf(Exception.class);
+        }
     }
 
     @Nested
@@ -306,26 +332,48 @@ class OperationsServiceTest {
     }
 
     @Nested
-    class killRunningAction {
-        // when processesManager#terminate throws InvalidAttributesException then return it
+    class KillRunningActionTestCase {
+
+        @Test
+        @DisplayName("when processesManager#terminate throws InvalidAttributesException then return it")
+        void exceptionThrown() throws InvalidAttributesException {
+            doThrow(InvalidAttributesException.class).when(processesManager).terminate(any());
+
+            assertThatThrownBy(() -> sut.killRunningAction(1L))
+                    .isExactlyInstanceOf(InvalidAttributesException.class);
+        }
+
+        @Test
+        @DisplayName("when called then processManager#terminate is invoked")
+        void terminateInvoked() throws InvalidAttributesException {
+            sut.killRunningAction(1L);
+
+            verify(processesManager).terminate(1L);
+        }
     }
 
     @Nested
-    class writeFile {
-        // when systemManager#writeFile throws IOException then return it
+    class WriteFileTestCase {
+        @Test
+        @DisplayName("when called then systemManager#writeFile is invoked")
+        void writeFileInvoked() throws IOException {
+            sut.writeFile("foo", "bar");
+
+            verify(systemManager).writeFile("foo", "bar");
+        }
+
+        @Test
+        @DisplayName("when systemManager#writeFile throws IOException then return it")
+        void ioExceptionThrown() throws IOException {
+            doThrow(IOException.class).when(systemManager).writeFile(any(), any());
+
+            assertThatThrownBy(() -> sut.writeFile("foo", "bar"))
+                    .isExactlyInstanceOf(IOException.class);
+        }
     }
 
     @Nested
-    class readFile {
-//        Stream<String> expectedList = Stream.of("foo", "bar", "foobar");
-//
-//        BufferedReader bufferedReader = Mockito.mock(BufferedReader.class);
-//            Mockito.when(bufferedReader.lines()).thenReturn(expectedList);
-//        when(systemManager.execute(any())).thenReturn(bufferedReader);
-//
-//        Stream<String> actual = sut.runCommand("waldo");
-//
-//        assertThat(actual).isEqualTo(expectedList);
+    class ReadFileCaseTest {
 
         @Test
         @DisplayName("when systemManager#readFile returns String then return it")

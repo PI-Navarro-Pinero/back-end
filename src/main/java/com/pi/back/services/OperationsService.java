@@ -16,8 +16,6 @@ import javax.naming.directory.InvalidAttributesException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -112,10 +110,15 @@ public class OperationsService {
     }
 
     public void inputToProcess(Long pid, String input) throws InvalidAttributesException {
-        OutputStream outputStream = processesManager.getRunningProcess(pid).getOutputStream();
-        PrintWriter printWriter = new PrintWriter(outputStream);
-        printWriter.println(input);
-        printWriter.flush();
+        try {
+            processesManager.writeIntoProcess(pid, input);
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error when writing '{}' into process {}: {}", input, pid, e);
+            throw e;
+        }
     }
 
     public List<Weapon> getAvailableWeapons() {
