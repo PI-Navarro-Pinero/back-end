@@ -109,7 +109,12 @@ public class OperationsService {
     }
 
     public List<Weapon> getAvailableWeapons() {
-        return weaponsRepository.getWeaponsList().getWeaponry();
+        Optional<Weaponry> optionalList = Optional.ofNullable(weaponsRepository.getWeaponsList());
+
+        if(optionalList.isEmpty())
+            return List.of();
+
+        return optionalList.get().getWeaponry();
     }
 
     public Weapon getWeapon(Integer weaponId) throws InvalidAttributesException {

@@ -1,6 +1,11 @@
 package com.pi.back.services;
 
-import com.pi.back.weaponry.*;
+import com.pi.back.weaponry.CommandValidator;
+import com.pi.back.weaponry.ProcessesManager;
+import com.pi.back.weaponry.SystemManager;
+import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.Weaponry;
+import com.pi.back.weaponry.WeaponsRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,12 +15,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.naming.directory.InvalidAttributesException;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -68,7 +72,7 @@ class OperationsServiceTest {
     }
 
     @Nested
-    class RunCommandTest {
+    class RunCommandTestCase {
 
         @Test
         @DisplayName("when systemManager#execute returns BufferedReader then return Stream of String")
@@ -96,33 +100,120 @@ class OperationsServiceTest {
     }
 
     @Nested
-    class getProcessPathname {
-        // when processesManager#getProcessPath throws Exception then re-throw
-        // when processesManager#getProcessPath return String then return it
+    class GetProcessPathnameTestCase {
+
+        @Test
+        @DisplayName("when processesManager#getProcessPath throws Exception then re-throw")
+        void exceptionThrown() throws InvalidAttributesException {
+            String expectedErrMsg = "foo";
+
+            when(processesManager.getProcessPath(any())).thenThrow(new InvalidAttributesException(expectedErrMsg));
+
+            assertThatThrownBy(() -> sut.getProcessPathname(123L))
+                    .isExactlyInstanceOf(InvalidAttributesException.class)
+                    .hasMessageContaining(expectedErrMsg);
+        }
+
+        @Test
+        @DisplayName("when processesManager#getProcessPath return String then return it")
+        void stringIsReturned() throws InvalidAttributesException {
+            String expected = "foobar";
+
+            when(processesManager.getProcessPath(any())).thenReturn(expected);
+
+            String actual = sut.getProcessPathname(123L);
+
+            assertThat(actual).isEqualTo(expected);
+        }
     }
 
     @Nested
-    class getProcessDirectoryPathname {
-        // when processesManager#getProcessDirectoryPath throws Exception then re-throw
-        // when processesManager#getProcessDirectoryPath return String then return it
+    class GetProcessDirectoryPathnameTestCase {
+
+        @Test
+        @DisplayName("when processesManager#getProcessDirectoryPath throws Exception then re-throw")
+        void exceptionThrown() throws InvalidAttributesException {
+            String expectedErrMsg = "foo";
+
+            when(processesManager.getProcessDirectoryPath(any())).thenThrow(new InvalidAttributesException(expectedErrMsg));
+
+            assertThatThrownBy(() -> sut.getProcessDirectoryPathname(123L))
+                    .isExactlyInstanceOf(InvalidAttributesException.class)
+                    .hasMessageContaining(expectedErrMsg);
+        }
+        @Test
+        @DisplayName("processesManager#getProcessDirectoryPath return String then return it")
+        void stringIsReturned() throws InvalidAttributesException {
+            String expected = "foobar";
+
+            when(processesManager.getProcessDirectoryPath(any())).thenReturn(expected);
+
+            String actual = sut.getProcessDirectoryPathname(123L);
+
+            assertThat(actual).isEqualTo(expected);
+        }
     }
 
     @Nested
-    class inputToProcess {
+    class InputToProcessTestCase {
         // when processesManager#getRunningProcess returns OutputStream then create PrintWriter, print and flush
         // when processesManager#getRunningProcess throws InvalidAttributesException then re-throw
     }
 
     @Nested
-    class getAvailableWeapons {
-        // when weaponsRepository#getWeaponsList returns Weaponry then return List of Weapon
-        // when weaponsRepository#getWeaponsList returns null then throw NullPointerException
+    class GetAvailableWeaponsTestCase {
+        @DisplayName("when weaponsRepository#getWeaponsList returns Weaponry then return List of Weapon")
+        @Test
+        void filledList() {
+            List<Weapon> expectedWeapon = List.of(Weapon.builder()
+                    .build());
+            Weaponry expectedWeaponry = Weaponry.builder()
+                    .weaponry(expectedWeapon)
+                    .build();
+
+            when(weaponsRepository.getWeaponsList()).thenReturn(expectedWeaponry);
+
+            List<Weapon> actual = sut.getAvailableWeapons();
+
+            assertThat(actual).isEqualTo(expectedWeapon);
+        }
+
+        @Test
+        @DisplayName("when weaponsRepository#getWeaponsList returns null then return empty list")
+        void emptyList() {
+            when(weaponsRepository.getWeaponsList()).thenReturn(null);
+
+            List<Weapon> actual = sut.getAvailableWeapons();
+
+            assertThat(actual).isEqualTo(List.of());
+        }
     }
 
     @Nested
-    class getWeapon {
-        // when weaponsRepository#findWeapon return Optional with present value then return Weapon
-        // when weaponsRepository#findWeapon return Optional with absent value then throw InvalidAttributesException
+    class GetWeaponTestCase {
+
+        @Test
+        @DisplayName("when weaponsRepository#findWeapon return Optional with present value then return Weapon")
+        void presentValue() throws InvalidAttributesException {
+            Weapon expectedWeapon = Weapon.builder()
+                    .build();
+
+            when(weaponsRepository.findWeapon(any())).thenReturn(Optional.of(expectedWeapon));
+
+            Weapon actual = sut.getWeapon(1);
+
+            assertThat(actual).isEqualTo(expectedWeapon);
+        }
+
+        @Test
+        @DisplayName("when weaponsRepository#findWeapon return Optional with absent value then throw InvalidAttributesException")
+        void absentValue() {
+            when(weaponsRepository.findWeapon(any())).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> sut.getWeapon(1))
+                    .hasMessageContaining("Requested weapon with id 1 does not exists.")
+                    .isExactlyInstanceOf(InvalidAttributesException.class);
+        }
     }
 
     @Nested
