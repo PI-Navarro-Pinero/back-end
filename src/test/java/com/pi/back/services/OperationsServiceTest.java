@@ -4,6 +4,7 @@ import com.pi.back.weaponry.CommandValidator;
 import com.pi.back.weaponry.ProcessesManager;
 import com.pi.back.weaponry.SystemManager;
 import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponProcess;
 import com.pi.back.weaponry.Weaponry;
 import com.pi.back.weaponry.WeaponsRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +18,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -141,6 +146,7 @@ class OperationsServiceTest {
                     .isExactlyInstanceOf(InvalidAttributesException.class)
                     .hasMessageContaining(expectedErrMsg);
         }
+
         @Test
         @DisplayName("processesManager#getProcessDirectoryPath return String then return it")
         void stringIsReturned() throws InvalidAttributesException {
@@ -217,20 +223,86 @@ class OperationsServiceTest {
     }
 
     @Nested
-    class getConfigurationFilePath {
-        // when weaponsRepository#findWeapon return Optional with Weapon having configuration file then return absolute path
-        // when weaponsRepository#findWeapon return Optional with Weapon not having configuration file then throw InvalidAttributesException
-        // when weaponsRepository#findWeapon return Optional with absent value then throw InvalidAttributesException
+    class GetConfigurationFilePathTestCase {
+
+        @Test
+        @DisplayName("when weaponsRepository#findWeapon return Optional with Weapon having configuration file then return absolute path")
+        void absolutePathIsReturned() throws IOException, InvalidAttributesException {
+            File expectedFile = new File("/tmp/foo");
+
+
+            Weapon expectedWeapon = Weapon.builder()
+                    .configFile(expectedFile)
+                    .build();
+
+            when(weaponsRepository.findWeapon(any())).thenReturn(Optional.of(expectedWeapon));
+
+            String actual = sut.getConfigurationFilePath(1);
+
+            assertThat(actual).isEqualTo("/tmp/foo");
+        }
+
+        @Test
+        @DisplayName("when weaponsRepository#findWeapon return Optional with Weapon not having configuration file then throw InvalidAttributesException")
+        void noConfigurationFile() throws InvalidAttributesException, IOException {
+            Weapon expectedWeapon = Weapon.builder()
+                    .name("foo")
+                    .build();
+
+            when(weaponsRepository.findWeapon(any())).thenReturn(Optional.of(expectedWeapon));
+
+            assertThatThrownBy(() -> sut.getConfigurationFilePath(1))
+                    .hasMessageContaining("Requested weapon 'foo' does not require a configuration file")
+                    .isExactlyInstanceOf(InvalidAttributesException.class);
+        }
+
+        @Test
+        @DisplayName("when weaponsRepository#findWeapon return Optional with absent value then throw InvalidAttributesException")
+        void exceptionThrownByRepository() {
+            when(weaponsRepository.findWeapon(any())).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> sut.getConfigurationFilePath(1))
+                    .hasMessageContaining("Requested weapon with id 1 does not exists.")
+                    .isExactlyInstanceOf(InvalidAttributesException.class);
+        }
     }
 
     @Nested
-    class getRunningActions {
-        // when processesManager#getAllRunningProcesses returns Map<Long, WeaponProcess> then return it
+    class GetRunningActionsTestCase {
+
+        @Test
+        @DisplayName("when processesManager#getAllRunningProcesses returns Map<Long, WeaponProcess> then return it")
+        void mapReturned() {
+            var mockWeaponProcess = WeaponProcess.builder()
+                    .build();
+            Map<Long, WeaponProcess> expectedMap = new HashMap<Long, WeaponProcess>();
+            expectedMap.put(1L, mockWeaponProcess);
+
+            when(processesManager.getAllRunningProcesses()).thenReturn(expectedMap);
+
+            Map<Long, WeaponProcess> actual = sut.getRunningActions();
+
+            assertThat(actual).isEqualTo(expectedMap);
+        }
     }
 
     @Nested
-    class getFinalizedActions {
-        // when processesManager#getAllTerminatedProcesses returns Map<Long, WeaponProcess> then return it
+    class GetFinalizedActionsTestCase {
+
+        @Test
+        @DisplayName("when processesManager#getAllTerminatedProcesses returns Map<Long, WeaponProcess> then return it")
+        void mapReturned() {
+            var mockWeaponProcess = WeaponProcess.builder()
+                    .build();
+            Map<Long, WeaponProcess> expectedMap = new HashMap<Long, WeaponProcess>();
+            expectedMap.put(1L, mockWeaponProcess);
+
+            when(processesManager.getAllTerminatedProcesses()).thenReturn(expectedMap);
+
+            Map<Long, WeaponProcess> actual = sut.getFinalizedActions();
+
+            assertThat(actual).isEqualTo(expectedMap);
+        }
     }
 
     @Nested
@@ -245,8 +317,45 @@ class OperationsServiceTest {
 
     @Nested
     class readFile {
-        // when systemManager#readFile returns String then return it
-        // when systemManager#readFile throws IOException then throw InvalidAttributesException
-        // when systemManager#readFile throws InvalidPathException then throw InvalidPathException
+//        Stream<String> expectedList = Stream.of("foo", "bar", "foobar");
+//
+//        BufferedReader bufferedReader = Mockito.mock(BufferedReader.class);
+//            Mockito.when(bufferedReader.lines()).thenReturn(expectedList);
+//        when(systemManager.execute(any())).thenReturn(bufferedReader);
+//
+//        Stream<String> actual = sut.runCommand("waldo");
+//
+//        assertThat(actual).isEqualTo(expectedList);
+
+        @Test
+        @DisplayName("when systemManager#readFile returns String then return it")
+        void stringReturned() throws IOException, InvalidAttributesException {
+            String expectedMessage = "foo";
+
+            when(systemManager.readFile(any())).thenReturn(expectedMessage);
+
+            String actual = sut.readFile("foobar");
+
+            assertThat(actual).isEqualTo(expectedMessage);
+        }
+
+        @Test
+        @DisplayName("when systemManager#readFile throws IOException then throw InvalidAttributesException")
+        void ioExceptionThrown() throws IOException {
+            when(systemManager.readFile(any())).thenThrow(IOException.class);
+
+            assertThatThrownBy(() -> sut.readFile("foobar"))
+                    .hasMessageContaining("Invalid file name")
+                    .isExactlyInstanceOf(InvalidAttributesException.class);
+        }
+
+        @Test
+        @DisplayName("when systemManager#readFile throws InvalidPathException then throw InvalidPathException")
+        void invalidPathExceptionThrown() throws IOException {
+            when(systemManager.readFile(any())).thenThrow(InvalidPathException.class);
+
+            assertThatThrownBy(() -> sut.readFile("foobar"))
+                    .isExactlyInstanceOf(InvalidPathException.class);
+        }
     }
 }

@@ -1,13 +1,23 @@
 package com.pi.back.services;
 
 import com.pi.back.utils.FileSystem;
-import com.pi.back.weaponry.*;
+import com.pi.back.weaponry.CommandValidator;
+import com.pi.back.weaponry.ProcessesManager;
+import com.pi.back.weaponry.SystemManager;
+import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponProcess;
+import com.pi.back.weaponry.Weaponry;
+import com.pi.back.weaponry.WeaponsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -111,7 +121,7 @@ public class OperationsService {
     public List<Weapon> getAvailableWeapons() {
         Optional<Weaponry> optionalList = Optional.ofNullable(weaponsRepository.getWeaponsList());
 
-        if(optionalList.isEmpty())
+        if (optionalList.isEmpty())
             return List.of();
 
         return optionalList.get().getWeaponry();
@@ -131,8 +141,6 @@ public class OperationsService {
         Weapon weapon = getWeapon(weaponId);
         return getConfigurationFilePathOf(weapon);
     }
-
-
 
     public Map<Long, WeaponProcess> getRunningActions() {
         return processesManager.getAllRunningProcesses();

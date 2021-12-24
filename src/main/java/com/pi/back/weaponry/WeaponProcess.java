@@ -1,11 +1,15 @@
 package com.pi.back.weaponry;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.io.File;
 import java.time.Instant;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class WeaponProcess {
 
     private final Process process;
