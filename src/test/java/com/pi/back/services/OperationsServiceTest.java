@@ -7,12 +7,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -61,9 +68,31 @@ class OperationsServiceTest {
     }
 
     @Nested
-    class runCommand {
-        // when systemManager#execute returns BufferedReader then return Stream of String
-        // when systemManager#execute throws Exception then throw IOException
+    class RunCommandTest {
+
+        @Test
+        @DisplayName("when systemManager#execute returns BufferedReader then return Stream of String")
+        void bufferedReaderReturned() throws IOException {
+            Stream<String> expectedList = Stream.of("foo", "bar", "foobar");
+
+            BufferedReader bufferedReader = Mockito.mock(BufferedReader.class);
+            Mockito.when(bufferedReader.lines()).thenReturn(expectedList);
+            when(systemManager.execute(any())).thenReturn(bufferedReader);
+
+            Stream<String> actual = sut.runCommand("waldo");
+
+            assertThat(actual).isEqualTo(expectedList);
+        }
+
+        @Test
+        @DisplayName("when systemManager#execute throws Exception then throw IOException")
+        void exceptionThrown() throws IOException {
+            when(systemManager.execute(any())).thenThrow(RuntimeException.class);
+
+            assertThatThrownBy(() -> sut.runCommand("waldo"))
+                    .hasMessageContaining("Command 'waldo' execution failed.")
+                    .isExactlyInstanceOf(IOException.class);
+        }
     }
 
     @Nested
