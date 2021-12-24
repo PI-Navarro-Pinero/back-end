@@ -38,7 +38,7 @@ public class WeaponProcess {
         process.destroy();
     }
 
-    public String getProcessAbsolutPath() {
+    public String getStdoutFileAbsolutPath() {
         return outputFile.getAbsolutePath();
     }
 

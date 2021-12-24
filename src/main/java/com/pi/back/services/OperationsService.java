@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,21 +60,28 @@ public class OperationsService {
             throw e;
         }
 
-        String outputPath = OUTPUTS_DIR + "/" + weapon.getName() + "/" + LocalDateTime.now() + "/" + actionId;
-        Process process = null;
+        String outputPath = String.format("%s/%s/%s/stdout", OUTPUTS_DIR, weapon.getName(), LocalDateTime.now(ZoneOffset.UTC));
+        Process process;
         File outputFile;
         try {
             outputFile = systemManager.createDirectory(outputPath);
             process = systemManager.execute(command, outputFile);
-            outputFile = systemManager.renameFile(outputFile, String.valueOf(process.pid()));
         } catch (Exception e) {
-            if (process != null)
-                process.destroy();
             throw new IOException("Command '" + command + "' execution failed.");
         }
 
         WeaponProcess weaponProcess = new WeaponProcess(process, weapon, outputFile);
         processesManager.insert(weaponProcess);
+
+        process.onExit().thenAccept(p -> {
+            try {
+                systemManager.checksumResults(p);
+            } catch (Exception e) {
+                log.error("Could not successfully calculate checksum for process {}: {}",
+                        p.pid(),
+                        !e.getMessage().isBlank() ? e.getMessage() : "No cause message available");
+            }
+        });
 
         return weaponProcess;
     }
@@ -89,7 +97,7 @@ public class OperationsService {
 
     public String getProcessPathname(Long pid) throws InvalidAttributesException {
         try {
-            String path = processesManager.getProcessPath(pid);
+            String path = processesManager.getProcessStdoutFilePath(pid);
             log.info("Path of process {} is '{}'", pid, path);
             return path;
         } catch (InvalidAttributesException e) {

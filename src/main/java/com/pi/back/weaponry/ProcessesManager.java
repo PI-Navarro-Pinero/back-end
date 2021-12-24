@@ -45,9 +45,9 @@ public class ProcessesManager {
         }
     }
 
-    public String getProcessPath(Long pid) throws InvalidAttributesException {
+    public String getProcessStdoutFilePath(Long pid) throws InvalidAttributesException {
         try {
-            return processesMap.get(pid).getProcessAbsolutPath();
+            return processesMap.get(pid).getStdoutFileAbsolutPath();
         } catch (Exception e) {
             throw new InvalidAttributesException("Provided pid " + pid + " does not belong to any process.");
         }
