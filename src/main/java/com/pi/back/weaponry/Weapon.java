@@ -8,24 +8,19 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 @Slf4j
 public class Weapon {
-    @Getter
+
     private String name;
-    @Getter
     private String description;
-    private String configurationFile;
-    @Getter
     private List<String> actions;
     private File configFile;
-
-    public File getConfigFile() {
-        return configFile;
-    }
 
     public void setName(String name) {
         if (name == null) {
@@ -60,5 +55,13 @@ public class Weapon {
             throw new NullPointerException();
         }
         this.actions = actions;
+    }
+
+    public Optional<String> retrieveAction(Integer actionId) {
+        try {
+            return Optional.of(actions.get(actionId));
+        } catch (IndexOutOfBoundsException e) {
+            return Optional.empty();
+        }
     }
 }

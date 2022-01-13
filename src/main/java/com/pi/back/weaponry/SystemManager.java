@@ -1,13 +1,16 @@
 package com.pi.back.weaponry;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,6 +23,7 @@ public class SystemManager {
 
     private final ProcessesManager processesManager;
 
+    @Autowired
     public SystemManager(ProcessesManager processesManager) {
         this.processesManager = processesManager;
     }
@@ -27,65 +31,31 @@ public class SystemManager {
     public Process execute(String command, File outputFile) throws IOException {
         String[] commands = {"/bin/bash", "-c", command};
         ProcessBuilder procBuilder = new ProcessBuilder(commands);
-        procBuilder.redirectOutput(outputFile);
-        procBuilder.redirectError(outputFile);
-        procBuilder.directory(outputFile.getParentFile());
 
-        return start(procBuilder);
+        return procBuilder
+                .redirectOutput(outputFile)
+                .redirectError(outputFile)
+                .directory(outputFile.getParentFile())
+                .start();
     }
 
-    public BufferedReader execute(String command) throws IOException {
+    public Process execute(String command) throws IOException {
         String[] commands = {"/bin/bash", "-c", command};
         ProcessBuilder procBuilder = new ProcessBuilder(commands);
-        Process proc = start(procBuilder);
 
-        return new BufferedReader(new InputStreamReader(proc.getInputStream()));
-    }
-
-    private Process start(ProcessBuilder processBuilder) throws IOException {
-        List<String> command = processBuilder.command();
-
-        try {
-            Process process = processBuilder.start();
-            log.info("Command '{}' executed successfully", command);
-            return process;
-        } catch (Exception e) {
-            log.error("Error while executing command '{}': {}", command, e);
-            throw e;
-        }
+        return procBuilder.start();
     }
 
     public File createDirectory(String path) {
         File file = new File(path);
         boolean directoryIsCreated;
 
-        try {
-            directoryIsCreated = file.getParentFile().mkdirs();
-        } catch (Exception e) {
-            log.error("Error creating output path file to '{}'", path);
-            throw e;
-        }
+        directoryIsCreated = file.getParentFile().mkdirs();
 
         if (directoryIsCreated)
             log.info("Directory '{}' has been created", path);
 
         return file;
-    }
-
-    public File renameFile(File fileToRename, String newName) throws IOException {
-        String name = fileToRename.getParent() + "/" + newName;
-        File newFile = new File(name);
-        boolean renameSucceeded = fileToRename.renameTo(newFile);
-
-        if (!renameSucceeded) {
-            String errMsg = " Output file couldn't be renamed from '"
-                    + fileToRename.getAbsolutePath() + "' to '"
-                    + name + "' ";
-            log.error(errMsg);
-            throw new IOException(errMsg);
-        }
-        log.info("File {} has been renamed to {}", fileToRename.getAbsolutePath(), name);
-        return newFile;
     }
 
     public void writeFile(String filePath, String content) throws IOException {
