@@ -1,7 +1,10 @@
 package com.pi.back.weaponry;
 
 import com.pi.back.utils.WeaponProcessDTO;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.function.BiFunction;
@@ -9,8 +12,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Builder(toBuilder = true)
+@Getter(value = AccessLevel.PROTECTED)
 public class ActionLauncher implements Action {
 
+    @Setter(value = AccessLevel.PROTECTED)
     private File file;
     private String command;
     private Weapon weapon;
@@ -40,7 +45,7 @@ public class ActionLauncher implements Action {
 
     @Override
     public ActionLauncher registerWeaponProcess(Consumer<WeaponProcess> registerWeaponProcessOperation) {
-        registerWeaponProcessConsumer = registerWeaponProcessOperation;
+        this.registerWeaponProcessConsumer = registerWeaponProcessOperation;
 
         return this;
     }
