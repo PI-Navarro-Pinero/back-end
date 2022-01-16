@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.naming.directory.InvalidAttributesException;
@@ -44,53 +45,39 @@ class OperationsServiceTest {
     @InjectMocks
     private OperationsService sut;
 
-    @Nested
-    class RunActionTestCase {
-       /* @Test
-        @DisplayName("when parameters are valid then return WeaponProcess")
-        void validParameters() throws InvalidAttributesException, IOException {
-            var mockWeapon = buildWeapon("foo", "bar", List.of("foobar"), new File("baz"));
-            var mockFile = new File("foo");
-
-            ProcessBuilder process = new ProcessBuilder("foo");
-            Process mockProcess = process.start();
-
-            when(weaponsRepository.findWeapon(any())).thenReturn(Optional.of(mockWeapon));
-            when(commandValidator.buildCommand(any(), any())).thenReturn("quz");
-            when(systemManager.createDirectory(any())).thenReturn(mockFile);
-            when(systemManager.execute(any(), any())).thenReturn(mockProcess);
-            when(systemManager.renameFile(any(), any())).thenReturn(mockFile);
-            WeaponProcess expectedWeaponProcess = new WeaponProcess(mockProcess, mockWeapon, mockFile);
-
-            WeaponProcess actualWeaponProcess = sut.runAction(1, 2, List.of(""));
-
-            assertThat(actualWeaponProcess).isEqualTo(expectedWeaponProcess);
-        }*/
-        // when weaponId is not valid then throw InvalidAttributesException
-        // when actionId is not valid then throw InvalidAttributesException
-        // when queryParamList is not valid then throw InvalidAttributesException
-        // when commandValidator throws Exception then re-throw
-        // when systemManager#createDirectory throws Exception then throw IOException
-        // when systemManager#execute throws Exception then throw IOException
-        // when systemManager#renameFile throws Exception then throw IOException
-    }
 
     @Nested
     class RunCommandTestCase {
 
-//        @Test
-//        @DisplayName("when systemManager#execute returns BufferedReader then return Stream of String")
-//        void bufferedReaderReturned() throws IOException {
-//            Stream<String> expectedList = Stream.of("foo", "bar", "foobar");
-//
-//            BufferedReader bufferedReader = Mockito.mock(BufferedReader.class);
-//            Mockito.when(bufferedReader.lines()).thenReturn(expectedList);
-//            when(systemManager.execute(any())).thenReturn(bufferedReader);
-//
-//            Stream<String> actual = sut.runCommand("waldo");
-//
-//            assertThat(actual).isEqualTo(expectedList);
-//        }
+        @Test
+        @DisplayName("when systemManager service's execute is invoked then return Process")
+        void serviceExecuted() throws IOException {
+            Process expectedProcess = Mockito.mock(Process.class);
+
+            when(systemManager.execute(any(), any())).thenReturn(expectedProcess);
+
+            Process actual = sut.runCommand("foo", File.createTempFile("bar", null));
+
+            assertThat(actual).isInstanceOf(Process.class);
+        }
+
+        @Test
+        @DisplayName("when systemManager throws IO Exception then throw Runtime Exception")
+        void ioExceptionThrown() throws IOException {
+            when(systemManager.execute(any(), any())).thenThrow(IOException.class);
+
+            assertThatThrownBy(() -> sut.runCommand("foo", File.createTempFile("bar", null)))
+                    .isInstanceOf(RuntimeException.class);
+        }
+
+        @Test
+        @DisplayName("when systemManager throws IO Exception then throw Runtime Exception")
+        void unsupportedOperationExceptionThrown() throws IOException {
+            when(systemManager.execute(any(), any())).thenThrow(RuntimeException.class);
+
+            assertThatThrownBy(() -> sut.runCommand("foo", File.createTempFile("bar", null)))
+                    .isInstanceOf(RuntimeException.class);
+        }
 
         @Test
         @DisplayName("when systemManager#execute throws Exception then throw IOException")

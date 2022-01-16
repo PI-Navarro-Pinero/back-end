@@ -232,19 +232,6 @@ public class OperationsService {
         }
     }
 
-    public String getCommandModelOf(Weapon weapon, Integer actionId) throws InvalidAttributesException {
-        try {
-            return weapon.getActions().get(actionId);
-        } catch (IndexOutOfBoundsException e) {
-            String errMsg = "Weapon '" + weapon.getName() + "' does not contain any action with id " + actionId;
-            log.info(errMsg);
-            throw new InvalidAttributesException(errMsg);
-        } catch (Exception e) {
-            log.error("Unexpected error while retrieving command model of action {} from weapon {}: {}", actionId, weapon, e);
-            throw e;
-        }
-    }
-
     private String getConfigurationFilePathOf(Weapon weapon) throws InvalidAttributesException {
         File configurationFile = weapon.getConfigFile();
 

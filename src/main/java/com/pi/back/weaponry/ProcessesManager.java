@@ -1,6 +1,7 @@
 package com.pi.back.weaponry;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import javax.naming.directory.InvalidAttributesException;
@@ -10,10 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 public class ProcessesManager {
 
+    @Getter(value = AccessLevel.PROTECTED)
     private Map<Long, WeaponProcess> processesMap;
 
     public ProcessesManager() {
