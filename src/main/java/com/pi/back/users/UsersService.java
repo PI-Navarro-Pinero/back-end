@@ -1,7 +1,5 @@
 package com.pi.back.users;
 
-import com.pi.back.users.User;
-import com.pi.back.users.UsersRepository;
 import com.pi.back.users.dto.UserDTO;
 import com.pi.back.users.model.UserRequest;
 import lombok.extern.slf4j.Slf4j;
