@@ -1,14 +1,26 @@
 package com.pi.back.web;
 
 import com.pi.back.services.OperationsService;
+import com.pi.back.utils.ExecuteActionDTO;
 import com.pi.back.weaponry.Weapon;
 import com.pi.back.weaponry.WeaponProcess;
-import com.pi.back.web.weaponry.*;
+import com.pi.back.web.weaponry.ActionOutputResponse;
+import com.pi.back.web.weaponry.ActionResponse;
+import com.pi.back.web.weaponry.ActionsResponse;
+import com.pi.back.web.weaponry.WeaponResponse;
+import com.pi.back.web.weaponry.WeaponsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.io.IOException;
@@ -74,8 +86,6 @@ public class WeaponryController {
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -94,8 +104,6 @@ public class WeaponryController {
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -107,12 +115,15 @@ public class WeaponryController {
                                                         @PathVariable(name = "actionId") Integer actionId,
                                                         @RequestParam(name = "parameters", required = false) List<String> parameters) {
         try {
-            WeaponProcess weaponProcess = operationsService.runAction(weaponId, actionId, parameters);
-            return ResponseEntity.ok().body(ActionResponse.newInstance(weaponProcess));
+            ExecuteActionDTO dto = ExecuteActionDTO.builder()
+                    .weaponId(weaponId)
+                    .actionId(actionId)
+                    .parameters(parameters == null ? List.of() : parameters)
+                    .build();
+            WeaponProcess result = operationsService.executeAction(dto);
+            return ResponseEntity.ok().body(ActionResponse.newInstance(result));
         } catch (InvalidAttributesException e) {
             return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(ActionResponse.newErrorInstance(e.getMessage()));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ActionResponse.newErrorInstance(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

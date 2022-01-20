@@ -1,17 +1,20 @@
 package com.pi.back.weaponry;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import javax.naming.directory.InvalidAttributesException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Component
 public class ProcessesManager {
 
+    @Getter(value = AccessLevel.PROTECTED)
     private Map<Long, WeaponProcess> processesMap;
 
     public ProcessesManager() {
@@ -65,5 +68,12 @@ public class ProcessesManager {
         } catch (Exception e) {
             throw new InvalidAttributesException("Provided pid " + pid + " does not belong to any running process.");
         }
+    }
+
+    public void writeIntoProcess(Long pid, String input) throws InvalidAttributesException {
+        OutputStream outputStream = getRunningProcess(pid).getOutputStream();
+        PrintWriter printWriter = new PrintWriter(outputStream);
+        printWriter.println(input);
+        printWriter.flush();
     }
 }

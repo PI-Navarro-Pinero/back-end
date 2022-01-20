@@ -1,11 +1,16 @@
 package com.pi.back.weaponry;
 
+import com.pi.back.utils.WeaponProcessDTO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.io.File;
 import java.time.Instant;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class WeaponProcess {
 
     private final Process process;
@@ -14,10 +19,10 @@ public class WeaponProcess {
     private final String creationTime;
     private final String commandLine;
 
-    public WeaponProcess(Process process, Weapon weapon, File outputFile) {
-        this.process = process;
-        this.weapon = weapon;
-        this.outputFile = outputFile;
+    public WeaponProcess(WeaponProcessDTO dto) {
+        this.process = dto.getProcess();
+        this.weapon = dto.getWeapon();
+        this.outputFile = dto.getOutputFile();
         this.creationTime = creationTime();
         this.commandLine = commandLine();
     }

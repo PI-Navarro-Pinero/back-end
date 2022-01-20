@@ -1,19 +1,31 @@
 package com.pi.back.services;
 
+import com.pi.back.utils.CommandValidator;
+import com.pi.back.utils.ExecuteActionDTO;
 import com.pi.back.utils.FileSystem;
-import com.pi.back.weaponry.*;
+import com.pi.back.weaponry.ActionLauncher;
+import com.pi.back.weaponry.ProcessesManager;
+import com.pi.back.weaponry.SystemManager;
+import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.WeaponProcess;
+import com.pi.back.weaponry.Weaponry;
+import com.pi.back.weaponry.WeaponsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.naming.directory.InvalidAttributesException;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.InvalidPathException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 @Service
@@ -22,65 +34,99 @@ public class OperationsService {
 
     private final String OUTPUTS_DIR = FileSystem.OUTPUTS.getPath();
 
-    private final CommandValidator commandValidator;
     private final ProcessesManager processesManager;
     private final WeaponsRepository weaponsRepository;
     private final SystemManager systemManager;
 
     @Autowired
-    public OperationsService(CommandValidator commandValidator,
-                             WeaponsRepository weaponsRepository,
+    public OperationsService(WeaponsRepository weaponsRepository,
                              ProcessesManager processesManager,
                              SystemManager systemManager) {
-        this.commandValidator = commandValidator;
         this.weaponsRepository = weaponsRepository;
         this.processesManager = processesManager;
         this.systemManager = systemManager;
     }
 
-    public WeaponProcess runAction(Integer weaponId, Integer actionId, List<String> queryParamsList) throws InvalidAttributesException, IOException {
-        Weapon weapon = getWeapon(weaponId);
-        String command = getCommandModelOf(weapon, actionId);
-
+    private String buildCommand(String commandModel, List<String> parametersList) throws InvalidAttributesException {
         try {
-            command = commandValidator.buildCommand(command, queryParamsList);
-        } catch (InvalidAttributesException e) {
-            log.info(e.getMessage());
-            throw e;
+            Optional<String> optionalString = CommandValidator.buildCommand(commandModel, parametersList);
+
+            if (optionalString.isEmpty()) {
+                String message = String.format("Command '%s' is unsuitable with parameters '%s'", commandModel, parametersList);
+                log.info(message);
+                throw new InvalidAttributesException(message);
+            }
+
+            return optionalString.get();
         } catch (Exception e) {
-            log.error("Unexpected error when building command '{}' with parameters {}: ", command, queryParamsList, e);
+            log.error("Unexpected error when building with command model '{}' and parameters {}: {}", commandModel, parametersList, e);
             throw e;
         }
+    }
 
-        String outputPath = String.format("%s/%s/%s/stdout", OUTPUTS_DIR, weapon.getName(), LocalDateTime.now(ZoneOffset.UTC));
-        Process process;
-        File outputFile;
+    public File createDirectory(String outputPath) {
         try {
-            outputFile = systemManager.createDirectory(outputPath);
-            process = systemManager.execute(command, outputFile);
+            return systemManager.createDirectory(outputPath);
+        } catch (SecurityException e) {
+            log.error("Security violation when creating output path file to '{}': {}", outputPath, e);
         } catch (Exception e) {
-            throw new IOException("Command '" + command + "' execution failed.");
+            log.error("Unexpected error while creating directory at {}: {}", outputPath, e);
         }
 
-        WeaponProcess weaponProcess = new WeaponProcess(process, weapon, outputFile);
-        processesManager.insert(weaponProcess);
+        throw new RuntimeException();
+    }
 
-        process.onExit().thenAccept(p -> {
+    public WeaponProcess executeAction(ExecuteActionDTO dto) throws InvalidAttributesException {
+        Weapon weapon = getWeapon(dto.getWeaponId());
+
+        String commandModel = weapon.retrieveAction(dto.getActionId())
+                .orElseThrow(() -> {
+                    String message = "Weapon '" + weapon.getName() + "' does not contain any action with id " + dto.getActionId();
+                    log.info(message);
+                    return new InvalidAttributesException(message);
+                });
+
+        String command = buildCommand(commandModel, dto.getParameters());
+
+        Consumer<Process> onExitBehavior = p -> {
             try {
+                log.info("Calculating checksum for process {}", p.pid());
                 systemManager.checksumResults(p);
             } catch (Exception e) {
-                log.error("Could not successfully calculate checksum for process {}: {}",
-                        p.pid(),
-                        !e.getMessage().isBlank() ? e.getMessage() : "No cause message available");
+                log.error("Could not calculate checksum for process {}: {}", p.pid(), e);
             }
-        });
+        };
 
-        return weaponProcess;
+        return ActionLauncher.builder().build()
+                .setWeapon(weapon)
+                .setCommand(command)
+                .defineDirectory(this::createDirectory, String.format("%s/%s/%s/stdout",
+                        OUTPUTS_DIR, weapon.getName(), LocalDateTime.now(ZoneOffset.UTC)))
+                .changeOnExitBehavior(onExitBehavior)
+                .registerWeaponProcess(processesManager::insert)
+                .execute(this::runCommand);
+    }
+
+    public Process runCommand(String command, File outputFile) {
+        try {
+            Process result = systemManager.execute(command, outputFile);
+            log.info("Command '{}' executed successfully", command);
+            return result;
+        } catch (IOException e) {
+            log.info("IO error occurred while executing command '{}': {}", command, e);
+        } catch (UnsupportedOperationException e) {
+            log.error("OS does not support the creation of process with command '{}'", command);
+        } catch (Exception e) {
+            log.error("Unexpected error while executing command '{}': {}", command, e);
+        }
+
+        throw new RuntimeException();
     }
 
     public Stream<String> runCommand(String command) throws IOException {
         try {
-            BufferedReader br = systemManager.execute(command);
+            Process process = systemManager.execute(command);
+            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
             return br.lines();
         } catch (Exception e) {
             throw new IOException("Command '" + command + "' execution failed.");
@@ -110,14 +156,24 @@ public class OperationsService {
     }
 
     public void inputToProcess(Long pid, String input) throws InvalidAttributesException {
-        OutputStream outputStream = processesManager.getRunningProcess(pid).getOutputStream();
-        PrintWriter printWriter = new PrintWriter(outputStream);
-        printWriter.println(input);
-        printWriter.flush();
+        try {
+            processesManager.writeIntoProcess(pid, input);
+        } catch (InvalidAttributesException e) {
+            log.info(e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Error when writing '{}' into process {}: {}", input, pid, e);
+            throw e;
+        }
     }
 
     public List<Weapon> getAvailableWeapons() {
-        return weaponsRepository.getWeaponsList().getWeaponry();
+        Optional<Weaponry> optionalList = Optional.ofNullable(weaponsRepository.getWeaponsList());
+
+        if (optionalList.isEmpty())
+            return List.of();
+
+        return optionalList.get().getWeaponry();
     }
 
     public Weapon getWeapon(Integer weaponId) throws InvalidAttributesException {
@@ -130,7 +186,7 @@ public class OperationsService {
         });
     }
 
-    public String getConfigurationFilePath(Integer weaponId) throws IOException, InvalidAttributesException {
+    public String getConfigurationFilePath(Integer weaponId) throws InvalidAttributesException {
         Weapon weapon = getWeapon(weaponId);
         return getConfigurationFilePathOf(weapon);
     }
@@ -173,16 +229,6 @@ public class OperationsService {
             String errMsg = "Provided path '" + filePath + "' could not be processed: " + e;
             log.error(errMsg);
             throw e;
-        }
-    }
-
-    private String getCommandModelOf(Weapon weapon, Integer actionId) throws InvalidAttributesException {
-        try {
-            return weapon.getActions().get(actionId);
-        } catch (IndexOutOfBoundsException e) {
-            String errMsg = "Weapon '" + weapon.getName() + "' does not contain any action with id " + actionId;
-            log.info(errMsg);
-            throw new InvalidAttributesException(errMsg);
         }
     }
 

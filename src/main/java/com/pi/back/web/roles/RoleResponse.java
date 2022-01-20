@@ -1,6 +1,5 @@
 package com.pi.back.web.roles;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.pi.back.config.security.Privileges;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
