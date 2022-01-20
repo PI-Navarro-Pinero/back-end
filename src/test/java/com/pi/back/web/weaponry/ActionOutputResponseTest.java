@@ -17,17 +17,5 @@ class ActionOutputResponseTest {
         ActionOutputResponse actual = ActionOutputResponse.newInstance(expectedList);
 
         assertThat(actual.getFiles()).isEqualTo(expectedList);
-        assertThat(actual.getError()).isNull();
-    }
-
-    @Test
-    @DisplayName("when String is provided then return ActionOutputResponse with 'error' containing given String")
-    void newErrorInstanceTest() {
-        String expectedMessage = "foo";
-
-        ActionOutputResponse actual = ActionOutputResponse.newErrorInstance(expectedMessage);
-
-        assertThat(actual.getError()).isEqualTo(expectedMessage);
-        assertThat(actual.getFiles()).isNull();
     }
 }

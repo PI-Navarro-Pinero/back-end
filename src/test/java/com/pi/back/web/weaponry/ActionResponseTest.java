@@ -33,7 +33,6 @@ class ActionResponseTest {
         assertThat(actual.getWeapon()).isEqualTo(mockWeapon.getName());
         assertThat(actual.getExecutionDate()).isNull();
         assertThat(actual.getCommandLine()).isNull();
-        assertThat(actual.getError()).isNull();
     }
 
     @Test
@@ -59,19 +58,5 @@ class ActionResponseTest {
         assertThat(actual.getWeapon()).isEqualTo(expectedWeaponName);
         assertThat(actual.getExecutionDate()).isEqualTo(expectedInstant.toString());
         assertThat(actual.getCommandLine()).isEqualTo(expectedCommandLine);
-        assertThat(actual.getError()).isNull();
-    }
-
-    @Test
-    void newErrorInstanceTest() {
-        String expectedMessage = "foo";
-
-        ActionResponse actual = ActionResponse.newErrorInstance(expectedMessage);
-
-        assertThat(actual.getPid()).isNull();
-        assertThat(actual.getWeapon()).isNull();
-        assertThat(actual.getExecutionDate()).isNull();
-        assertThat(actual.getCommandLine()).isNull();
-        assertThat(actual.getError()).isEqualTo(expectedMessage);
     }
 }

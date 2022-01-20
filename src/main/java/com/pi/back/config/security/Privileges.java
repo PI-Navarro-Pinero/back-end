@@ -22,4 +22,9 @@ public enum Privileges {
     private final Integer roleId;
     private final String role;
     private final String description;
+
+    public enum Values {
+        ROLE_ADMIN,
+        ROLE_AGENT
+    }
 }

@@ -1,5 +1,6 @@
 package com.pi.back.web.email;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -24,6 +25,8 @@ public class NewEmailRequest {
     private String subject;
     @NotNull
     private String body;
+    @Schema(nullable = true)
     private Properties headers;
+    @Schema(nullable = true)
     private Properties properties;
 }

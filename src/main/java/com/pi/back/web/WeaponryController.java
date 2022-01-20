@@ -1,5 +1,8 @@
 package com.pi.back.web;
 
+import com.pi.back.config.swagger.HttpStatusCodes;
+import com.pi.back.config.swagger.SwaggerConfig;
+import com.pi.back.config.swagger.SwaggerTags;
 import com.pi.back.services.OperationsService;
 import com.pi.back.utils.ExecuteActionDTO;
 import com.pi.back.weaponry.Weapon;
@@ -9,8 +12,16 @@ import com.pi.back.web.weaponry.ActionResponse;
 import com.pi.back.web.weaponry.ActionsResponse;
 import com.pi.back.web.weaponry.WeaponResponse;
 import com.pi.back.web.weaponry.WeaponsResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +32,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.naming.directory.InvalidAttributesException;
 import java.io.IOException;
@@ -32,6 +44,7 @@ import java.util.stream.Collectors;
 import static com.pi.back.config.security.Privileges.Roles.ROLE_AGENT;
 
 @RestController
+@Slf4j
 public class WeaponryController {
 
     private final OperationsService operationsService;
@@ -41,25 +54,109 @@ public class WeaponryController {
         this.operationsService = operationsService;
     }
 
+    @Operation(
+            summary = "Listado de herramientas disponibles",
+            description = "Obtener el listado completo de herramientas disponibles",
+            tags = SwaggerTags.WEAPONRY,
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Listado completo de herramientas disponibles",
+                            content = @Content(
+                                    schema = @Schema(implementation = WeaponsResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.NO_CONTENT,
+                            description = "No hay ninguna herramienta disponible",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/weaponry")
     public ResponseEntity<WeaponsResponse> fetchWeaponry() {
-        List<Weapon> weaponMap = operationsService.getAvailableWeapons();
+        try {
+            List<Weapon> weaponMap = operationsService.getAvailableWeapons();
 
-        AtomicInteger index = new AtomicInteger();
-        final List<WeaponResponse> weaponsListResponse = weaponMap.stream()
-                .map(weapon -> WeaponResponse.newInstance(index.getAndIncrement(), weapon))
-                .collect(Collectors.toList());
+            AtomicInteger index = new AtomicInteger();
+            final List<WeaponResponse> weaponsListResponse = weaponMap.stream()
+                    .map(weapon -> WeaponResponse.newInstance(index.getAndIncrement(), weapon))
+                    .collect(Collectors.toList());
 
-        if (weaponsListResponse.isEmpty())
-            return ResponseEntity.noContent().build();
+            if (weaponsListResponse.isEmpty())
+                return ResponseEntity.noContent().build();
 
-        return ResponseEntity.ok(WeaponsResponse
-                .builder()
-                .weaponry(weaponsListResponse)
-                .build());
+            return ResponseEntity.ok(WeaponsResponse
+                    .builder()
+                    .weaponry(weaponsListResponse)
+                    .build());
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    @Operation(
+            summary = "Obtener una herramientas disponible",
+            description = "Obtener una herramienta disponible a partir de su ID",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "weaponId",
+                            description = "ID de la herramienta")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Detalles de la herramienta",
+                            content = @Content(
+                                    schema = @Schema(implementation = WeaponResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El ID provisto no corresponde a ninguna herramienta disponible",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/{weaponId}")
     public ResponseEntity<WeaponResponse> fetchWeaponActions(@PathVariable(name = "weaponId") Integer weaponId) {
@@ -67,12 +164,58 @@ public class WeaponryController {
             Weapon weapon = operationsService.getWeapon(weaponId);
             return ResponseEntity.ok(WeaponResponse.newInstance(weaponId, weapon));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(WeaponResponse.newErrorInstance(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Obtener archivo de configuración",
+            description = "Obtener el contenido del archivo de configuración de una herramienta a partir de su ID",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "weaponId",
+                            description = "ID de la herramienta"),
+                    @Parameter(
+                            name = "encode",
+                            description = "Codificar la respuesta en Base64")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Contenido del archivo de configuración",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.TEXT_PLAIN_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El ID provisto no corresponde a ninguna herramienta disponible o no requiere archivo de configuración",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/weaponry/{weaponId}/configuration-file")
     public ResponseEntity<String> getConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
@@ -85,17 +228,62 @@ public class WeaponryController {
                 result = new String(Base64.getEncoder().encode(result.getBytes()));
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Actualizar archivo de configuración",
+            description = "Actualizar el contenido del archivo de configuración de una herramienta a partir de su ID",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "weaponId",
+                            description = "ID de la herramienta"),
+                    @Parameter(
+                            name = "encoded",
+                            description = "Codificar el contenido en Base64")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Contenido del archivo de configuración actualizado correctamente",
+                            content = @Content(
+                                    schema = @Schema())),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El ID provisto no corresponde a ninguna herramienta disponible o no requiere archivo de configuración",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @PutMapping("/weaponry/{weaponId}/configuration-file")
-    public ResponseEntity<String> setConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
-                                                       @RequestBody String configurationFile,
-                                                       @RequestParam(required = false) boolean encoded) {
+    public ResponseEntity<Void> setConfigurationFile(@PathVariable(name = "weaponId") Integer weaponId,
+                                                     @RequestBody String configurationFile,
+                                                     @RequestParam(required = false) boolean encoded) {
         try {
             String pathname = operationsService.getConfigurationFilePath(weaponId);
             if (encoded)
@@ -103,12 +291,61 @@ public class WeaponryController {
             operationsService.writeFile(pathname, configurationFile);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Lanzar una accion",
+            description = "Lanzar acción de una herramienta disponible a partir de sus IDs",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "weaponId",
+                            description = "ID de la herramienta"),
+                    @Parameter(
+                            name = "actionId",
+                            description = "ID de la acción"),
+                    @Parameter(
+                            name = "parameters",
+                            description = "Parametros necesarios para lanzar la acción si esta lo requiere"),
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Detalles asociados a la acción lanzada",
+                            content = @Content(
+                                    schema = @Schema(implementation = ActionResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "Algún ID o los parámetros provistos son inválidos para el lanzamiento de la acción",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @PostMapping("/weaponry/{weaponId}/actions/{actionId}")
     public ResponseEntity<ActionResponse> executeAction(@PathVariable(name = "weaponId") Integer weaponId,
@@ -123,12 +360,44 @@ public class WeaponryController {
             WeaponProcess result = operationsService.executeAction(dto);
             return ResponseEntity.ok().body(ActionResponse.newInstance(result));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(ActionResponse.newErrorInstance(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Acciones lanzadas",
+            description = "Listado completo de acciones lanzadas",
+            tags = SwaggerTags.WEAPONRY,
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Listado de acciones lanzadas",
+                            content = @Content(
+                                    schema = @Schema(implementation = ActionsResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/launched-actions")
     public ResponseEntity<ActionsResponse> getLaunchedActions() {
@@ -150,10 +419,63 @@ public class WeaponryController {
 
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Obtener resultado de acción lanzada",
+            description = "Realizar la lectura de una acción lanzada a partir de su PID",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "pid",
+                            description = "ID de la acción lanzada"),
+                    @Parameter(
+                            name = "lines",
+                            description = "Cantidad de lineas de texto que se desean obtener (contando desde la más reciente). " +
+                                    "Ingresar 0 para lectura completa")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Lectura de la acción lanzada",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.TEXT_PLAIN_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El PID provisto no está asociado a ninguna acción lanzada",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.SERVICE_UNAVAILABLE,
+                            description = "Error al procesar la lectura del recurso",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/launched-actions/{pid}/stdout")
     public ResponseEntity<String> readActionStdout(@PathVariable(name = "pid") Long pid,
@@ -167,14 +489,64 @@ public class WeaponryController {
                     .collect(Collectors.joining("\n"));
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
+            log.error("Command execution error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Obtener archivos generados de acción lanzada",
+            description = "Realizar la lectura del listado de archivos generados por una acción lanzada a partir de su PID",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "pid",
+                            description = "ID de la acción lanzada")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Listado de archivos generados por la acción lanzada",
+                            content = @Content(
+                                    schema = @Schema(implementation = ActionOutputResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El PID provisto no está asociado a ninguna acción lanzada",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.SERVICE_UNAVAILABLE,
+                            description = "Error al procesar la lectura del recurso",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/launched-actions/{pid}/files")
     public ResponseEntity<ActionOutputResponse> getActionOutput(@PathVariable(name = "pid") Long pid) {
@@ -187,14 +559,61 @@ public class WeaponryController {
 
             return ResponseEntity.ok(ActionOutputResponse.newInstance(result));
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(ActionOutputResponse.newErrorInstance(e.getMessage()));
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ActionOutputResponse.newErrorInstance(e.getMessage()));
+            log.error("Command execution error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Leer contenido de un archivo generado por una acción",
+            description = "Realizar la lectura del contenido de un archivo generado por una acción lanzada",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "pid",
+                            description = "ID de la acción lanzada"),
+                    @Parameter(
+                            name = "fileName",
+                            description = "Nombre del archivo")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Contenido del archivo",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.TEXT_PLAIN_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El PID no está asociado a ninguna acción lanzada o el nombre del archivo es inválido",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/launched-actions/{pid}/files/{fileName}")
     public ResponseEntity<String> readActionOutputFile(@PathVariable(name = "pid") Long pid,
@@ -204,12 +623,44 @@ public class WeaponryController {
             String result = operationsService.readFile(pathname);
             return ResponseEntity.ok().body(result);
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Acciones lanzadas activas",
+            description = "Listado de acciones lanzadas en estado de ejecución",
+            tags = SwaggerTags.WEAPONRY,
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Listado de acciones lanzadas en ejecución",
+                            content = @Content(
+                                    schema = @Schema(implementation = ActionsResponse.class),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @GetMapping("/launched-actions/active")
     public ResponseEntity<ActionsResponse> getCurrentRunningActions() {
@@ -225,34 +676,122 @@ public class WeaponryController {
 
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Detener una acción activa",
+            description = "Finalizar la ejecución de una acción lanzada que se encuentra activa",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "pid",
+                            description = "ID de la acción activa")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Acción finalizada",
+                            content = @Content(
+                                    schema = @Schema())),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El PID provisto no está asociado a ninguna acción activa",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @DeleteMapping("/launched-actions/active/{pid}/terminate")
-    public ResponseEntity<String> killCurrentRunningAction(@PathVariable(name = "pid") Long pid) {
+    public ResponseEntity<Void> killCurrentRunningAction(@PathVariable(name = "pid") Long pid) {
         try {
             operationsService.killRunningAction(pid);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @Operation(
+            summary = "Escribir por stdin de una acción activa",
+            description = "Ingresar datos a un accion en estado de ejecución a través del stdin ",
+            tags = SwaggerTags.WEAPONRY,
+            parameters = {
+                    @Parameter(
+                            name = "pid",
+                            description = "ID de la acción activa"),
+                    @Parameter(
+                            name = "stdin",
+                            description = "Texto a transferir")
+            },
+            security = @SecurityRequirement(name = SwaggerConfig.BOOKINGS_BASIC_AUTH),
+            responses = {
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.OK,
+                            description = "Los datos fueron escritos",
+                            content = @Content(
+                                    schema = @Schema())),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.PRECONDITION_FAILED,
+                            description = "El PID provisto no está asociado a ninguna acción activa",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.UNAUTHORIZED,
+                            description = "Error de autenticación. Se debe autenticar la petición mediante usuario y contraseña",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.FORBIDDEN,
+                            description = "Error de autorización. El usuario autenticado no cuenta con los permisos suficientes",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+                    @ApiResponse(
+                            responseCode = HttpStatusCodes.INTERNAL_SERVER_ERROR,
+                            description = "Error inesperado interno del sistema",
+                            content = @Content(
+                                    schema = @Schema(),
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE)),
+            })
     @Secured(ROLE_AGENT)
     @PutMapping("/launched-actions/active/{pid}/stdin")
-    public ResponseEntity<String> inputIntoRunningAction(@PathVariable(name = "pid") Long pid,
-                                                         @RequestParam(name = "stdin", required = false) String input) {
+    public ResponseEntity<Void> inputIntoRunningAction(@PathVariable(name = "pid") Long pid,
+                                                       @RequestParam(name = "stdin", required = false) String input) {
         try {
             operationsService.inputToProcess(pid, input);
             return ResponseEntity.ok().build();
         } catch (InvalidAttributesException e) {
-            return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED, e.getMessage(), e);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Unexpected error: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -3,6 +3,7 @@ package com.pi.back.web.users;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.pi.back.config.security.Privileges;
 import com.pi.back.db.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +22,8 @@ public class UserResponse {
     private String username;
     private String fullname;
     private String license;
-    private String error;
+
+    @Schema(example = "[ ROLE_ADMIN ]")
     private List<Privileges> privileges;
 
     public static final UserResponse newInstance(User user) {
@@ -39,12 +41,6 @@ public class UserResponse {
                 .fullname(user.getFullname())
                 .license(user.getLicense())
                 .privileges(user.getRoles())
-                .build();
-    }
-
-    public static UserResponse newErrorInstance(Exception error) {
-        return UserResponse.builder()
-                .error(error.getMessage())
                 .build();
     }
 }

@@ -144,8 +144,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(FETCH_WEAPON_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -185,8 +184,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(CONFIGURATION_FILE_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -225,8 +223,7 @@ class WeaponryControllerTest {
             mockMvc.perform(put(CONFIGURATION_FILE_PATH)
                             .content(asJsonString("foo"))
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -282,8 +279,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(post(EXECUTE_ACTION_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is(expectedErrMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -407,8 +403,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(STDOUT_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -420,8 +415,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(STDOUT_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isServiceUnavailable())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isServiceUnavailable());
         }
 
         @Test
@@ -472,8 +466,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(ACTION_OUTPUT_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -486,8 +479,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(ACTION_OUTPUT_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isServiceUnavailable())
-                    .andExpect(jsonPath("$.error", is(errMessage)));
+                    .andExpect(status().isServiceUnavailable());
         }
 
         @Test
@@ -527,8 +519,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(READ_ACTION_OUTPUT_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -540,8 +531,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(get(READ_ACTION_OUTPUT_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -623,8 +613,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(delete(KILL_ACTION_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -659,8 +648,7 @@ class WeaponryControllerTest {
 
             mockMvc.perform(put(WRITE_ACTION_PATH)
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$", is(errMessage)));
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test

@@ -18,7 +18,6 @@ public class ActionResponse {
     private String weapon;
     private String executionDate;
     private String commandLine;
-    private String error;
 
     public static ActionResponse newInstance(WeaponProcess weaponProcess) {
         return ActionResponse.builder()
@@ -33,12 +32,6 @@ public class ActionResponse {
                 .weapon(weaponProcess.getWeapon().getName())
                 .executionDate(weaponProcess.getCreationTime())
                 .commandLine(weaponProcess.getCommandLine())
-                .build();
-    }
-
-    public static ActionResponse newErrorInstance(String message) {
-        return ActionResponse.builder()
-                .error(message)
                 .build();
     }
 }
