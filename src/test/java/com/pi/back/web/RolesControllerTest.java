@@ -1,7 +1,8 @@
 package com.pi.back.web;
 
 import com.pi.back.config.security.Privileges;
-import com.pi.back.services.RolesService;
+import com.pi.back.roles.RolesController;
+import com.pi.back.roles.RolesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +42,7 @@ class RolesControllerTest {
 
     @Nested
     @DisplayName("GET /roles")
-    class fetchRolesTest {
+    class FetchRolesTest {
 
         @Test
         @DisplayName("when roles are found then return 200 ok")
@@ -73,7 +74,7 @@ class RolesControllerTest {
 
     @Nested
     @DisplayName("GET /roles/{roleId}")
-    class fetchRoleTest {
+    class FetchRoleTest {
 
         @Test
         @DisplayName("when specific role is found then return 200 ok")

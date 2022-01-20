@@ -1,6 +1,6 @@
 package com.pi.back.weaponry;
 
-import com.pi.back.utils.WeaponProcessDTO;
+import com.pi.back.weaponry.dto.WeaponProcessDTO;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

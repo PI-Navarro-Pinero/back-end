@@ -1,7 +1,8 @@
 package com.pi.back.web.users;
 
 import com.pi.back.config.security.Privileges;
-import com.pi.back.db.User;
+import com.pi.back.users.User;
+import com.pi.back.users.model.UserResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

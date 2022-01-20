@@ -1,6 +1,7 @@
 package com.pi.back.db;
 
 import com.pi.back.config.security.Privileges;
+import com.pi.back.users.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

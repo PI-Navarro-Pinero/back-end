@@ -1,6 +1,7 @@
 package com.pi.back.services;
 
 import com.pi.back.config.security.Privileges;
+import com.pi.back.roles.RolesService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,6 +1,6 @@
 package com.pi.back.config.security;
 
-import com.pi.back.db.User;
+import com.pi.back.users.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

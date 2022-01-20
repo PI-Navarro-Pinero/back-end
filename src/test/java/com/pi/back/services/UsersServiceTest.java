@@ -1,10 +1,11 @@
 package com.pi.back.services;
 
 import com.pi.back.config.security.Privileges;
-import com.pi.back.db.User;
-import com.pi.back.db.UsersRepository;
-import com.pi.back.web.users.UserDTO;
-import com.pi.back.web.users.UserRequest;
+import com.pi.back.users.User;
+import com.pi.back.users.UsersRepository;
+import com.pi.back.users.UsersService;
+import com.pi.back.users.dto.UserDTO;
+import com.pi.back.users.model.UserRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class UsersServiceTest {
 
     @Nested
     @DisplayName("find all users in repository")
-    class findAllTest {
+    class FindAllTest {
         @Test
         void findAll() {
             User mockUser = User.builder()
@@ -62,7 +63,7 @@ class UsersServiceTest {
 
     @Nested
     @DisplayName("find a user in repository")
-    class findUserTest {
+    class FindUserTest {
 
         @Test
         @DisplayName("when user is found then return User")
@@ -94,7 +95,7 @@ class UsersServiceTest {
 
     @Nested
     @DisplayName("create a new user")
-    class createTest {
+    class CreateTest {
 
         @Test
         @DisplayName("when condition is not met then create user")
@@ -165,7 +166,7 @@ class UsersServiceTest {
 
     @Nested
     @DisplayName("update existing user")
-    class updateTest {
+    class UpdateTest {
 
         @Test
         @DisplayName("when user to update has id 0 then throw InvalidParameterException")
@@ -302,7 +303,7 @@ class UsersServiceTest {
 
     @Nested
     @DisplayName("delete existing user")
-    class deleteTest {
+    class DeleteTest {
 
         @Test
         @DisplayName("when user to delete has id 0 then throw InvalidParameterException")

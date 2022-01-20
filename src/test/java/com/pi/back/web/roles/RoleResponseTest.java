@@ -1,6 +1,7 @@
 package com.pi.back.web.roles;
 
 import com.pi.back.config.security.Privileges;
+import com.pi.back.roles.model.RoleResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

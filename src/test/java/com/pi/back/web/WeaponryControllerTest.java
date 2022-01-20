@@ -2,10 +2,11 @@ package com.pi.back.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pi.back.services.OperationsService;
-import com.pi.back.utils.WeaponProcessDTO;
+import com.pi.back.weaponry.OperationsService;
+import com.pi.back.weaponry.dto.WeaponProcessDTO;
 import com.pi.back.weaponry.Weapon;
 import com.pi.back.weaponry.WeaponProcess;
+import com.pi.back.weaponry.WeaponryController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
