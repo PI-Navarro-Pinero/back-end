@@ -28,18 +28,5 @@ class WeaponResponseTest {
         assertThat(actual.isConfigurationFile()).isTrue();
         assertThat(actual.getDescription()).isEqualTo("foobar");
         assertThat(actual.getActions()).isEqualTo(Map.of(0, "baz", 1, "quz", 2, "qux"));
-        assertThat(actual.getError()).isNull();
-    }
-
-    @Test
-    void newErrorInstanceTest() {
-        WeaponResponse actual = WeaponResponse.newErrorInstance("foo");
-
-        assertThat(actual.getError()).isEqualTo("foo");
-        assertThat(actual.getId()).isNull();
-        assertThat(actual.getName()).isNull();
-        assertThat(actual.isConfigurationFile()).isFalse();
-        assertThat(actual.getDescription()).isNull();
-        assertThat(actual.getActions()).isNull();
     }
 }

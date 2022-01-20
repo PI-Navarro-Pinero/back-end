@@ -24,7 +24,6 @@ public class WeaponResponse {
     private boolean configurationFile;
     private String description;
     private Map<Integer, String> actions;
-    private String error;
 
     public static WeaponResponse newInstance(Integer id, Weapon weapon) {
         AtomicInteger index = new AtomicInteger();
@@ -36,12 +35,6 @@ public class WeaponResponse {
                 .description(weapon.getDescription())
                 .actions(weapon.getActions().stream()
                         .collect(Collectors.toMap(i -> index.getAndIncrement(), s -> s)))
-                .build();
-    }
-
-    public static WeaponResponse newErrorInstance(String error) {
-        return WeaponResponse.builder()
-                .error(error)
                 .build();
     }
 }

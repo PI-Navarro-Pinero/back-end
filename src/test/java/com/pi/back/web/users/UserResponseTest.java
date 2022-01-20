@@ -50,14 +50,4 @@ class UserResponseTest {
         assertThat(actual.getLicense()).isEqualTo(user.getLicense());
         assertThat(actual.getPrivileges()).isEqualTo(user.getRoles());
     }
-
-    @Test
-    @DisplayName("create UserResponse error message from Exception")
-    void newErrorInstanceTest() {
-        Exception e = new RuntimeException("foobar");
-
-        UserResponse actual = UserResponse.newErrorInstance(e);
-
-        assertThat(actual.getError()).isEqualTo(e.getMessage());
-    }
 }

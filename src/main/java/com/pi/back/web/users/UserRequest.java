@@ -1,13 +1,13 @@
 package com.pi.back.web.users;
 
 import com.pi.back.config.security.Privileges;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -33,5 +33,6 @@ public class UserRequest {
     @Size(max = LICENSE_MAX_LENGHT)
     private String license;
 
+    @Schema(implementation = Privileges.Values.class, example = "[ ROLE_ADMIN, ROLE_AGENT ]")
     private List<Privileges> privileges;
 }

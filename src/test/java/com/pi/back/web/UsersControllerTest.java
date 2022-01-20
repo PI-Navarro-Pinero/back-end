@@ -67,7 +67,7 @@ class UsersControllerTest {
             when(usersService.findAll()).thenReturn(List.of(mockUser));
 
             mockMvc.perform(get(USERS_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.users", hasSize(1)))
                     .andExpect(jsonPath("$.users.[0].id", is(mockUser.getId())))
@@ -81,7 +81,7 @@ class UsersControllerTest {
             when(usersService.findAll()).thenReturn(List.of());
 
             mockMvc.perform(get(USERS_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNoContent());
         }
     }
@@ -96,7 +96,7 @@ class UsersControllerTest {
             when(usersService.findUser(any())).thenReturn(mockUser);
 
             mockMvc.perform(get(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id", is(mockUser.getId())))
                     .andExpect(jsonPath("$.username", is(mockUser.getUsername())))
@@ -111,7 +111,7 @@ class UsersControllerTest {
             when(usersService.findUser(any())).thenThrow(new NoSuchElementException());
 
             mockMvc.perform(get(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNotFound());
         }
 
@@ -121,7 +121,7 @@ class UsersControllerTest {
             when(usersService.findUser(any())).thenThrow(new RuntimeException());
 
             mockMvc.perform(get(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isInternalServerError());
         }
     }
@@ -138,8 +138,8 @@ class UsersControllerTest {
             when(usersService.create(any())).thenReturn(mockUser);
 
             mockMvc.perform(post(USERS_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id", is(mockUser.getId())))
                     .andExpect(jsonPath("$.username", is(mockUser.getUsername())))
@@ -154,10 +154,9 @@ class UsersControllerTest {
             when(usersService.create(any())).thenThrow(new InvalidAttributesException("foo explanation"));
 
             mockMvc.perform(post(USERS_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is("foo explanation")));
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -166,8 +165,8 @@ class UsersControllerTest {
             when(usersService.create(any())).thenThrow(new RuntimeException());
 
             mockMvc.perform(post(USERS_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
                     .andExpect(status().isInternalServerError());
         }
     }
@@ -184,8 +183,8 @@ class UsersControllerTest {
             when(usersService.update(any())).thenReturn(mockUser);
 
             mockMvc.perform(put(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
                     .andExpect(status().isOk());
         }
 
@@ -197,10 +196,9 @@ class UsersControllerTest {
             when(usersService.update(any())).thenThrow(new InvalidParameterException(exceptionMessage));
 
             mockMvc.perform(put(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is(exceptionMessage)));
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -211,10 +209,9 @@ class UsersControllerTest {
             when(usersService.update(any())).thenThrow(new InvalidAttributesException(exceptionMessage));
 
             mockMvc.perform(put(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is(exceptionMessage)));
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -225,8 +222,8 @@ class UsersControllerTest {
             when(usersService.update(any())).thenThrow(new ClassNotFoundException(exceptionMessage));
 
             mockMvc.perform(put(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
                     .andExpect(status().isNotFound());
         }
 
@@ -236,8 +233,8 @@ class UsersControllerTest {
             when(usersService.update(any())).thenThrow(new RuntimeException());
 
             mockMvc.perform(put(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(asJsonString(mockRequest)))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(asJsonString(mockRequest)))
                     .andExpect(status().isInternalServerError());
         }
     }
@@ -250,7 +247,7 @@ class UsersControllerTest {
         @DisplayName("when deleted user then return 200 ok")
         void deletedUser() throws Exception {
             mockMvc.perform(delete(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk());
         }
 
@@ -260,7 +257,7 @@ class UsersControllerTest {
             doThrow(new NoSuchElementException()).when(usersService).delete(anyInt());
 
             mockMvc.perform(delete(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isNoContent());
         }
 
@@ -272,9 +269,8 @@ class UsersControllerTest {
             doThrow(new InvalidParameterException(exceptionMessage)).when(usersService).delete(anyInt());
 
             mockMvc.perform(delete(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isPreconditionFailed())
-                    .andExpect(jsonPath("$.error", is(exceptionMessage)));
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isPreconditionFailed());
         }
 
         @Test
@@ -283,7 +279,7 @@ class UsersControllerTest {
             doThrow(new RuntimeException()).when(usersService).delete(anyInt());
 
             mockMvc.perform(delete(USER_URI_PATH)
-                    .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isInternalServerError());
         }
     }
