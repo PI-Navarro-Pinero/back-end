@@ -1,6 +1,7 @@
 package com.pi.back.services;
 
 import com.pi.back.utils.CommandValidator;
+import com.pi.back.weaponry.OperationsService;
 import com.pi.back.weaponry.ProcessesManager;
 import com.pi.back.weaponry.SystemManager;
 import com.pi.back.weaponry.Weapon;

@@ -1,5 +1,6 @@
 package com.pi.back.web.weaponry;
 
+import com.pi.back.weaponry.model.ActionOutputResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

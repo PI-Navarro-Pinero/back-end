@@ -1,7 +1,7 @@
 package com.pi.back.config.security;
 
-import com.pi.back.db.User;
-import com.pi.back.db.UsersRepository;
+import com.pi.back.users.User;
+import com.pi.back.users.UsersRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

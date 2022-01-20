@@ -1,6 +1,6 @@
 package com.pi.back.config.security;
 
-import com.pi.back.db.User;
+import com.pi.back.users.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;

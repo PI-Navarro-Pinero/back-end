@@ -1,6 +1,7 @@
 package com.pi.back.web.weaponry;
 
 import com.pi.back.weaponry.Weapon;
+import com.pi.back.weaponry.model.WeaponResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
