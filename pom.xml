@@ -11,7 +11,7 @@
 	<groupId>com.pi.back</groupId>
 	<artifactId>back-end</artifactId>
 	<version>1.0</version>
-	<name>back-end</name>
+	<name>pinp</name>
 	<description>PINP REST API</description>
 
 	<properties>
