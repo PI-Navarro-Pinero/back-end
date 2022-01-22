@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>com.pi.back</groupId>
 	<artifactId>back-end</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>back-end</name>
-	<description>Back del PI</description>
+	<description>PINP REST API</description>
 
 	<properties>
 		<java.version>11</java.version>
