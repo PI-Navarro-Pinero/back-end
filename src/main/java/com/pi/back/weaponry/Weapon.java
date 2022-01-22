@@ -64,4 +64,15 @@ public class Weapon {
             return Optional.empty();
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "\n\n*\tName: %s\n" +
+                "\tDescription: %s\n" +
+                "\tConfiguration File: %s\n " +
+                "\tActions: %s\n" +
+                "\t\t---------------------------",
+                name, description, configFile, actions.toString());
+    }
 }
