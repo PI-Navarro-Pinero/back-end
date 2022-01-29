@@ -1,0 +1,21 @@
+weaponry:
+  # - name: Pandora
+  #   description: Description and usage of the tool
+  #   configurationFile: /path/to/config.py.default
+  #   actions:
+  #   - python -m pandora -m discovery [var1]
+  #   - python -m pandora -m intrusion [var1]
+  #   - python -m pandora -m intrusion [var1] -et
+  #   - python -m pandora -m intrusion [var1] -et -it2 [var2]
+  #   - python -m pandora -m recollect [var1]
+  #   - python -m pandora -m deauth [var1] -tmac [var2] -dt [var3]
+
+  - name: Nmap
+    description: Nmap tool
+    actions:
+      - nmap ()
+      
+  - name: Free-Terminal
+    description: Free terminal use
+    actions:
+      - ()
