@@ -11,12 +11,16 @@
 
 ## Environment
 
-The project needs a working `.env` file to be able to start. There is a default file named 'env.example' which you can use as an example.
+The project needs a working `.env` file to be able to start. There is a default file named '`env.example`' which you can use as an example.
 So you can create your environment file for development with:
 
 ```bash
 cp env.example .env
 ```
+
+## Weaponry
+
+The project also needs a `weapons.yaml` file that contains all the available weapons. The [Dockerfile](Dockerfile) automaticaly copies the [`weapons.example.yaml`](weapons.example.yaml) to the container, so if you want to add a new weapon, add it to the file.
 
 ## Running service
 

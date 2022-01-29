@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.pi.back</groupId>
 	<artifactId>pinp</artifactId>
-	<version>1.0</version>
+	<version>1.0.0</version>
 	<name>PINP REST API</name>
 	<description>
 		Proyecto Integrador Navarro-Piñero - Año 2021.
@@ -99,6 +99,14 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.6</version>
+				<configuration>
+					<excludes>
+						<exclude>**/*swagger*</exclude>
+						<exclude>com/pi/back/config/environment/**/*</exclude>
+						<exclude>com/pi/back/config/logging/**/*</exclude>
+						<exclude>com/pi/back/mail/**/*</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>

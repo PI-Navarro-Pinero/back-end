@@ -4,9 +4,8 @@ COPY pom.xml /home/pinp
 RUN mvn -f /home/pinp/pom.xml clean package
 
 FROM openjdk:11-jre-slim
-#RUN useradd -ms /bin/bash pinp
-#USER pinp
 WORKDIR /pinp
-COPY --from=build /home/pinp/target/back-end-0.0.1-SNAPSHOT.jar backend.jar
+COPY --from=build /home/pinp/target/pinp-1.0.0.jar backend.jar
+COPY weapons.example.yaml weapons.yaml
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","backend.jar"]
