@@ -104,6 +104,7 @@
 						<exclude>**/*swagger*</exclude>
 						<exclude>com/pi/back/config/environment/**/*</exclude>
 						<exclude>com/pi/back/config/logging/**/*</exclude>
+						<exclude>com/pi/back/mail/**/*</exclude>
 					</excludes>
 				</configuration>
 				<executions>
