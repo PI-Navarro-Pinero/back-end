@@ -9,10 +9,15 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.pi.back</groupId>
-	<artifactId>back-end</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>back-end</name>
-	<description>Back del PI</description>
+	<artifactId>pinp</artifactId>
+	<version>1.0</version>
+	<name>PINP REST API</name>
+	<description>
+		Proyecto Integrador Navarro-Piñero - Año 2021.
+		Universidad Nacional de Córdoba - Facultad de Ciencias Exactas, Físicas y Naturales.
+		Directores: Miguel Solinas y Javier Jorge.
+		GitHub: https://github.com/PI-Navarro-Pinero/back-end
+	</description>
 
 	<properties>
 		<java.version>11</java.version>

@@ -15,4 +15,11 @@ import java.util.List;
 @AllArgsConstructor
 public class Weaponry {
     private List<Weapon> weaponry;
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        weaponry.forEach(weapon -> s.append(weapon.toString()));
+        return s.toString();
+    }
 }
