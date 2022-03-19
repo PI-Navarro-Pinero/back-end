@@ -76,3 +76,24 @@ For a full reference about docker-compose visit the [compose-reference](https://
 
 - `docker system prune`: Remove unused data.
 - `docker rmi $(docker image ls -q)`: Remove all docker images.
+
+---
+
+# Run with Java
+
+## Pre-requisites
+- OpenJDK version 11
+- Linux based OS. _Suggested: Kali Linux_
+- Latest JAR package
+- Define environment variable `BASE_DIR` to set working directory 
+```
+# On Debian based Linux platform:
+$ export BASE_DIR=/path/to/working/directory
+```
+- Copy [provided `weapons.yaml` example file](https://github.com/PI-Navarro-Pinero/back-end/blob/updated_readme/weapons.example.yaml) inside working directory
+
+## Running application
+Run application as a jar package
+```
+$ java -jar pinp-1.0.0.jar
+```
